@@ -1,0 +1,119 @@
+# This defined resource creates user defined keyfile. You will specify its content handing over ifc_data_default, ifc_data hashes.
+# When you have keyfiles, you can specify its names inside ethernet_connection_files hash.
+define networkmanager::ifc::fallback(
+  Enum['absent', 'present'] $ensure = present,
+  Enum['up', 'down']        $state = 'up',
+  Hash                      $ifc_data_default = {},
+  Hash                      $ifc_data = {}, #pozaduje tento hash
+  Hash                      $ethernet_connection_files = {},
+) {
+  include networkmanager
+  Networkmanager::Ifc::Fallback[$title] ~> Class['networkmanager']
+  File['/etc/NetworkManager/NetworkManager.conf'] -> Networkmanager::Ifc::Fallback[$title]
+
+  $connections_e = deep_merge($ifc_data_default, $ifc_data)
+
+  $connections_e.each | $connection, $params | {
+    if $params['ensure'] {
+      $ensure = $params['ensure']
+    }
+    else {
+      $ensure = 'present'
+    }
+    $ensure_file = $ensure ? {
+      'absent' => 'absent',
+      default  => 'file'
+    }
+
+    $confilename = "/etc/NetworkManager/system-connections/${connection}.nmconnection"
+    $uuid = networkmanager::connection_uuid($connection)
+    $needed_params = {
+      'connection' => {
+        'id'          => $connection,
+        'uuid'        => $uuid,
+        'type'        => 'ethernet',
+        'permissions' => '',
+      },
+      'ethernet'   => {
+        'auto-negotiate' => 'true',
+      },
+      'ipv4'       => {
+        'method' => 'auto',
+      },
+      'ipv6'       => {
+        'method' => 'auto',
+      }
+    }
+    # Překládá lidské identifikátory na UUID
+    # parent => 'bond0'
+    # se stane v configu
+    # parent=58d7fc42-8392-4ab9-924d-ab39f6f2434b
+    $non_uuid_parents = keys($params).filter |$p|{
+      'parent' in keys($params[$p]) and $params[$p]['parent'] !~ /^\h{8}(-\h{4}){3}-\h{12}$/
+    }.reduce({}) |$nup, $px| {
+      $nup + {$px => {'parent' => networkmanager::connection_uuid($params[$px]['parent'])}}
+    }
+    $non_uuid_masters = keys($params).filter |$m|{
+      'master' in keys($params[$m]) and $params[$m]['master'] !~ /^\h{8}(-\h{4}){3}-\h{12}$/
+    }.reduce({}) |$num, $mx| {
+      $num + {$mx => {'master' => networkmanager::connection_uuid($params[$mx]['master'])}}
+    }
+    $params_e = deep_merge($needed_params, $params, $non_uuid_parents, $non_uuid_masters)
+    $keyfile_settings = {
+      'path'              => $confilename,
+      'quote_char'        => '',
+      'key_val_separator' => '=',
+      'require'           => File[$confilename]
+    }
+    file {
+      $confilename:
+        ensure  => $ensure_file,
+        owner   => 'root',
+        group   => 'root',
+        replace => true,
+        backup  => false,
+        mode    => '0600',
+        content => hash2ini($params_e,$keyfile_settings);
+    }
+    if $ensure == present {
+   #   @@exec { "activate ${connection}":
+   #     command => "/usr/bin/sleep 2 && /usr/bin/nmcli connection reload && /usr/bin/nmcli connection ${state} ${connection}",
+   #     provider    => 'shell',
+   #     group => 'root',
+   #     user => 'root',
+   #     subscribe => File[$confilename],
+   #     refreshonly => true,
+   #     tag => "nmactivate-2022b07${networkmanager::sys_id}";
+   #   }
+       networkmanager::activate_connection($connection, $state)
+    }
+  }
+
+  #zde můžu vložit soubory jako už hotová spojení (soubory, kter0 se jenom vloží do adresáře /etc/NetworkManager/system-connections/)
+  $ethernet_connection_files.each | $eth_file_name | {
+    file {
+      "/etc/NetworkManager/system-connections/${eth_file_name}":
+        ensure  => 'file',
+        owner   => 'root',
+        group   => 'root',
+        replace => false,
+        backup  => false,
+        mode    => '0600',
+        source  => "puppet:///modules/fzu/NM/keyfiles/${eth_file_name}";
+    }
+  #  @@exec { "activate ${eth_file_name}":
+  #   command =>  networkmanager::reload_connection($eth_file_name, $state),
+  #   provider    => 'shell',
+  #   group => 'root',
+  #   user => 'root',
+  #   subscribe => File[$eth_file_name],
+  #   refreshonly => true,
+  #   tag => "nmactivate-2022b07${networkmanager::sys_id}";
+  #  }
+     networkmanager::activate_connection($eth_file_name, $state)
+  }
+  include networkmanager::reload
+  Networkmanager::Ifc::Fallback[$title] ~> Class['networkmanager::reload']
+}
+
+
