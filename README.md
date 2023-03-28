@@ -8,8 +8,6 @@
     * [What networkmanager module affects](#what-networkmanager-affects)
     * [Setup requirements](#setup-requirements)
     * [Beginning with networkmanager](#beginning-with-networkmanager)
-1. [Usage - Configuration options and additional functionality](#usage)
-1. [Development - Guide for contributing to the module](#development)
 
 ## Description
 
