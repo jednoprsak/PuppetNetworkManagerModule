@@ -4,7 +4,7 @@
   "author": "Lukáš Míča",
   "summary": "",
   "license": "proprietary",
-  "source": "",
+  "source": "https://github.com/jednoprsak/PuppetNetworkManagerModule",
   "dependencies": [
     {
       "name": "puppetlabs/stdlib",
