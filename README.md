@@ -94,14 +94,3 @@ networkmanager::ifc::bond::slave { 'bondslaveens9':
 mica@fzu.cz
 jednoprsak@gmail.com
 
-## Development
-
-In the Development section, tell other users the ground rules for contributing
-to your project and how they should submit their work.
-
-## Release Notes/Contributors/Etc. **Optional**
-
-If you aren't using changelog, put your release notes here (though you should
-consider using changelog). You can also add any additional sections you feel are
-necessary or important to include here. Please use the `##` header.
-
