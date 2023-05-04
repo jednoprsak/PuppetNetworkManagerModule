@@ -30,6 +30,7 @@ When you want to begin with NetworkManager, you need to be clever as devil, but
 our module will help you create keyfiles and push them inside that oven of hell.
 
 ## Usage
+```puppet
 
 class { 'networkmanager':
   erase_unmanaged_keyfiles => true,
@@ -85,7 +86,7 @@ networkmanager::ifc::bond::slave { 'bondslaveens9':
   mac_address => 'MAC_ADDRESS',
   master  => 'bondmaster2',
 }
-
+```
 
 ## Contact
 
