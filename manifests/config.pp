@@ -1,4 +1,4 @@
-#This class configures file /etc/NetworkManager/NetworkManager.conf, 
+#This class configures file /etc/NetworkManager/NetworkManager.conf,
 #sets up whether to erase unmanaged keyfiles, and adds no-auto-default option
 # inside config file according to no_auto_default parameter defined at the entrance
 # of networkmanager class.
@@ -95,7 +95,7 @@ class networkmanager::config (
       group   => 'root',
       recurse => true,
       purge   => $erase_unmanaged_keyfiles,
-      mode    => '0755';
+      mode    => '0640';
  }
 
 }
