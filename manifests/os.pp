@@ -10,6 +10,10 @@ class networkmanager::os (){
       $package_name = 'NetworkManager'
       $extra_packages = []
     }
+    'gentoo': {
+      $package_name = 'net-misc/networkmanager'
+      $extra_packages = []
+    }
     default: {
       fail('OS family unknown')
     }
