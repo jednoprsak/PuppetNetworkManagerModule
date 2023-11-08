@@ -19,6 +19,7 @@ class networkmanager (
   Array[String] $unmanaged_devices = [],
   Boolean $wait_online = true,
   Variant[Boolean, Enum['stub'], Undef] $use_internal_resolv_conf = undef,
+  Array[String] $plugins = ['keyfile'],
 )
 {
   $sys_id = [
