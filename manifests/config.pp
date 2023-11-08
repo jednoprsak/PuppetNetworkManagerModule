@@ -7,7 +7,7 @@ class networkmanager::config (
   Boolean $erase_unmanaged_keyfiles = $networkmanager::erase_unmanaged_keyfiles,
   Variant[Boolean,String] $no_auto_default = $networkmanager::no_auto_default,
   Array[String] $unmanaged_devices = $networkmanager::unmanaged_devices,
-  Array[String] $plugins = [ 'keyfile' ],
+  Array[String] $plugins = $networkmanager::plugins,
   Hash $additional_config = {},
   Variant[Boolean, Enum['stub'], Undef] $use_internal_resolv_conf = $networkmanager::use_internal_resolv_conf,
 ){
