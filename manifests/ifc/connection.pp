@@ -5,8 +5,8 @@ define networkmanager::ifc::connection(
   Enum['absent', 'present'] $ensure = present,
   String                    $id = $title, #connection name used during the start via nmcli
   String                    $type = 'ethernet',
-  String                    $interface_name = undef
-  Stdlib::MAC               $mac_address = undef,
+  Optional[String]          $interface_name = undef
+  Optional[Stdlib::MAC]     $mac_address = undef,
   Enum['up', 'down']        $state = 'up',
   Optional[String]          $master = undef,
   Enum['auto','dhcp','manual','disabled','link-local']        $ipv4_method = 'auto',
@@ -26,6 +26,10 @@ define networkmanager::ifc::connection(
 ){
   include networkmanager
   Class['networkmanager'] -> Networkmanager::Ifc::Connection[$title]
+
+  if $type == 'ethernet' and $interface_name == undef and $mac_address == undef {
+    fail("for ethernet connection ${id} either interface_name or mac_address is required")
+  }
 
   $ipv6_method_w = networkmanager::ipv6_disable_version($ipv6_method)
 
