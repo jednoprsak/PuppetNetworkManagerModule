@@ -5,7 +5,7 @@ define networkmanager::ifc::connection(
   Enum['absent', 'present'] $ensure = present,
   String                    $id = $title, #connection name used during the start via nmcli
   String                    $type = 'ethernet',
-  Optional[String]          $interface_name = undef
+  Optional[String]          $interface_name = undef,
   Optional[Stdlib::MAC]     $mac_address = undef,
   Enum['up', 'down']        $state = 'up',
   Optional[String]          $master = undef,
