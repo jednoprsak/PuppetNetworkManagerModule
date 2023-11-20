@@ -5,7 +5,8 @@ define networkmanager::ifc::connection(
   Enum['absent', 'present'] $ensure = present,
   String                    $id = $title, #connection name used during the start via nmcli
   String                    $type = 'ethernet',
-  Stdlib::MAC               $mac_address = undef,
+  Optional[String]          $interface_name = undef,
+  Optional[Stdlib::MAC]     $mac_address = undef,
   Enum['up', 'down']        $state = 'up',
   Optional[String]          $master = undef,
   Enum['auto','dhcp','manual','disabled','link-local']        $ipv4_method = 'auto',
@@ -26,33 +27,41 @@ define networkmanager::ifc::connection(
   include networkmanager
   Class['networkmanager'] -> Networkmanager::Ifc::Connection[$title]
 
+  if $type == 'ethernet' and $interface_name == undef and $mac_address == undef {
+    fail("for ethernet connection ${id} either interface_name or mac_address is required")
+  }
+
   $ipv6_method_w = networkmanager::ipv6_disable_version($ipv6_method)
 
+  if $interface_name {
+    $interface_name_config = { interface-name => $interface_name }
+  }
+  else {
+    $interface_name_config = {}
+  }
+
   if $master {
-    $connection_config = {
-      connection => {
-        id => $id,
-        uuid => networkmanager::connection_uuid($id),
-        type => $type,
-        master => $master,
-      },
-      ethernet => {
-        mac-address => $mac_address
-      }
-    }
+    $master_config = { master => $master }
   }
-  elsif !$master {
-    $connection_config = {
-      connection => {
-        id => $id,
-        uuid => networkmanager::connection_uuid($id),
-        type => $type,
-      },
-      ethernet => {
-        mac-address => $mac_address
-      }
-    }
+  else {
+    $master_config = {}
   }
+
+  $connection_config = {
+    connection => {
+      id => $id,
+      uuid => networkmanager::connection_uuid($id),
+      type => $type,
+    } + $interface_name_config + $master_config,
+  }
+
+  if $mac_address {
+    $ethernet_config = { ethernet => { mac-address => $mac_address } }
+  }
+  else {
+    $ethernet_config = {}
+  }
+
   $ipv6_dhcp_duid_w = $ipv6_dhcp_duid ? {
     'auto'  => networkmanager::connection_duid($mac_address),
     default => $ipv6_dhcp_duid,
@@ -152,7 +161,7 @@ define networkmanager::ifc::connection(
   }
 
 
-  $keyfile_contents = deep_merge($connection_config, $ipv4_config, $ipv6_config, $additional_config)
+  $keyfile_contents = deep_merge($connection_config, $ethernet_config, $ipv4_config, $ipv6_config, $additional_config)
 
 
   $keyfile_settings = {
