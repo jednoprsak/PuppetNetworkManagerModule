@@ -49,7 +49,7 @@ define networkmanager::ifc::vlan (
     }
   }
 
-  $keyfile_contents = deep_merge($connection_config, $ipv4_config, $ipv6_config, $additional_config)
+  $keyfile_contents = deep_merge($connection_config, $additional_config)
   $keyfile_settings = {
     'path'              => "/etc/NetworkManager/system-connections/${id}.nmconnection",
     'quote_char'        => '',
@@ -57,20 +57,20 @@ define networkmanager::ifc::vlan (
     'require'           => File["/etc/NetworkManager/system-connections/${id}.nmconnection"]
   }
 
-  file { 
+  file {
      "/etc/NetworkManager/system-connections/${id}.nmconnection":
-     ensure => $ensure,
-     owner  => 'root',
-     group  => 'root',
-     replace   => true,
-     mode   => '0600',
+     ensure  => $ensure,
+     owner   => 'root',
+     group   => 'root',
+     replace => true,
+     mode    => '0600',
      content => hash2ini($keyfile_contents,$keyfile_settings);
   }
 
   if $ensure == present {
-  
+
 #  @@exec { "activate ${id}":
-#     command => networkmanager::reload_connection($id, $state), 
+#     command => networkmanager::reload_connection($id, $state),
 #     provider    => 'shell',
 #     group => 'root',
 #     user => 'root',
@@ -80,7 +80,7 @@ define networkmanager::ifc::vlan (
 #  }
 
    networkmanager::activate_connection($id, $state)
-  
+
   }
 
   include networkmanager::reload
