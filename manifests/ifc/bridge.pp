@@ -24,11 +24,11 @@ define networkmanager::ifc::bridge (
   Variant[Integer[-1, 2]]   $ipv6_privacy = 0,
   Boolean                   $ipv6_may_fail = true,
   Hash                      $additional_config = {}
-) 
+)
 {
   include networkmanager
   Class['networkmanager'] -> Networkmanager::Ifc::Bridge[$title]
-  
+
   $ipv6_method_w = networkmanager::ipv6_disable_version($ipv6_method)
 
   if $master {
@@ -59,11 +59,6 @@ define networkmanager::ifc::bridge (
         forward-delay => '2',
       }
     }
-  }
-
-  $ipv6_dhcp_duid_w = $ipv6_dhcp_duid ? {
-    'auto'  => networkmanager::connection_duid($mac_address),
-    default => $ipv6_dhcp_duid,
   }
 
   if ($ipv4_method == 'manual' or $ipv4_address) and $ipv4_gateway {
@@ -129,13 +124,9 @@ define networkmanager::ifc::bridge (
       }
     }
   }
-  elsif $ipv6_dhcp_duid_w == undef and ($ipv6_method_w == 'auto' or $ipv6_method_w == 'dhcp' )
+  elsif $ipv6_dhcp_duid == undef and ($ipv6_method_w == 'auto' or $ipv6_method_w == 'dhcp' )
   {
-    $ipv6_config = {
-      ipv6 => {
-        method => 'ignore'
-      }
-    }
+    fail("IPv6 method for connection '${id}' is '${ipv6_method_w}' but no \$ipv6_dhcp_duid was supplied.")
   }
   elsif $ipv6_method_w == 'auto' or ipv6_method_w == 'dhcp'
   {
@@ -147,7 +138,7 @@ define networkmanager::ifc::bridge (
         ip6-privacy => $ipv6_privacy,
         may-fail => $ipv6_may_fail,
         dns => $ipv6_dns,
-        dhcp-duid => $ipv6_dhcp_duid_w
+        dhcp-duid => $ipv6_dhcp_duid
       }
    }
   }
@@ -167,13 +158,13 @@ define networkmanager::ifc::bridge (
     'require'           => File["/etc/NetworkManager/system-connections/${id}.nmconnection"]
   }
 
-  file { 
+  file {
      "/etc/NetworkManager/system-connections/${id}.nmconnection":
-     ensure => $ensure,
-     owner  => 'root',
-     group  => 'root',
-     replace   => true,
-     mode   => '0600',
+     ensure  => $ensure,
+     owner   => 'root',
+     group   => 'root',
+     replace => true,
+     mode    => '0600',
      content => hash2ini($keyfile_contents,$keyfile_settings);
   }
 
@@ -193,7 +184,7 @@ define networkmanager::ifc::bridge (
    networkmanager::activate_connection($id, $state)
 
   }
-  
+
   include networkmanager::reload
   Networkmanager::Ifc::Bridge[$title] ~> Class['networkmanager::reload']
 }
