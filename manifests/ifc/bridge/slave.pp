@@ -4,7 +4,7 @@
 define networkmanager::ifc::bridge::slave (
   Enum['absent', 'present'] $ensure = present,
   Enum['up', 'down']        $state = 'up',
-  String                    $id = $title, #connection name used during the start via nmcli
+  String[3, 15]             $id = $title, #connection name used during the start via nmcli
   String                    $type = 'ethernet',
   String                    $master = undef,
   String                    $slave_type = 'bridge',
@@ -35,7 +35,7 @@ define networkmanager::ifc::bridge::slave (
     'require'           => File["/etc/NetworkManager/system-connections/${id}.nmconnection"]
   }
 
-  file { 
+  file {
      "/etc/NetworkManager/system-connections/${id}.nmconnection":
      ensure => $ensure,
      owner  => 'root',
@@ -43,12 +43,12 @@ define networkmanager::ifc::bridge::slave (
      replace   => true,
      mode   => '0600',
      content => hash2ini($keyfile_contents,$keyfile_settings);
-  } 
-  
+  }
+
   if $ensure == present {
 
 #  @@exec { "activate ${id}":
-#     command => networkmanager::reload_connection($id, $state), 
+#     command => networkmanager::reload_connection($id, $state),
 #     provider    => 'shell',
 #     group => 'root',
 #     user => 'root',

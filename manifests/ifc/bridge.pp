@@ -3,7 +3,7 @@
 # In the case when you want to specify special not listed parameters you can add them through additional_config hash and it will be merged with other parameters.
 define networkmanager::ifc::bridge (
   Enum['absent', 'present'] $ensure = present,
-  String                    $id = $title, #connection name used during the start via nmcli
+  String[3, 15              $id = $title, #connection name used during the start via nmcli
   String                    $type = 'bridge',
   String                    $ifc_name = $title,
   Enum['up', 'down']        $state = 'up',
@@ -24,11 +24,11 @@ define networkmanager::ifc::bridge (
   Variant[Integer[-1, 2]]   $ipv6_privacy = 0,
   Boolean                   $ipv6_may_fail = true,
   Hash                      $additional_config = {}
-) 
+)
 {
   include networkmanager
   Class['networkmanager'] -> Networkmanager::Ifc::Bridge[$title]
-  
+
   $ipv6_method_w = networkmanager::ipv6_disable_version($ipv6_method)
 
   if $master {
@@ -167,7 +167,7 @@ define networkmanager::ifc::bridge (
     'require'           => File["/etc/NetworkManager/system-connections/${id}.nmconnection"]
   }
 
-  file { 
+  file {
      "/etc/NetworkManager/system-connections/${id}.nmconnection":
      ensure => $ensure,
      owner  => 'root',
@@ -193,7 +193,7 @@ define networkmanager::ifc::bridge (
    networkmanager::activate_connection($id, $state)
 
   }
-  
+
   include networkmanager::reload
   Networkmanager::Ifc::Bridge[$title] ~> Class['networkmanager::reload']
 }
