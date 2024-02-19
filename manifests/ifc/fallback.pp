@@ -14,9 +14,9 @@ define networkmanager::ifc::fallback(
   $uuid = networkmanager::connection_uuid($id)
 
   $ensure_file = $ensure ? {
-    'absent' => 'absent',
+    'absent'  => 'absent',
     'present' => 'file',
-    default  => 'file'
+    default   => 'file'
   }
 
   $needed_params = {
@@ -59,7 +59,7 @@ define networkmanager::ifc::fallback(
     'path'              => $confilename,
     'quote_char'        => '',
     'key_val_separator' => '=',
-    'require'           => File[$confilename]
+    'require'           => File[$confilename],
   }
 
   file {
@@ -74,7 +74,7 @@ define networkmanager::ifc::fallback(
   }
 
   if $ensure == present {
-     networkmanager::activate_connection($id, $state)
+    networkmanager::activate_connection($id, $state)
   }
 
   include networkmanager::reload

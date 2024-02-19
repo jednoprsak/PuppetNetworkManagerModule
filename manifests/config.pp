@@ -4,11 +4,11 @@
 # of networkmanager class.
 # It is not recomanded to use it without main networkmanager class.
 class networkmanager::config (
-  Boolean $erase_unmanaged_keyfiles = $networkmanager::erase_unmanaged_keyfiles,
-  Variant[Boolean,String] $no_auto_default = $networkmanager::no_auto_default,
-  Array[String] $unmanaged_devices = $networkmanager::unmanaged_devices,
-  Hash $additional_config = $networkmanager::additional_config,
-  Array[String] $plugins = $networkmanager::plugins,
+  Boolean                               $erase_unmanaged_keyfiles = $networkmanager::erase_unmanaged_keyfiles,
+  Variant[Boolean,String]               $no_auto_default = $networkmanager::no_auto_default,
+  Array[String]                         $unmanaged_devices = $networkmanager::unmanaged_devices,
+  Hash                                  $additional_config = $networkmanager::additional_config,
+  Array[String]                         $plugins = $networkmanager::plugins,
   Variant[Boolean, Enum['stub'], Undef] $use_internal_resolv_conf = $networkmanager::use_internal_resolv_conf,
 ){
   $main_conf_file = '/etc/NetworkManager/NetworkManager.conf'
@@ -42,7 +42,7 @@ class networkmanager::config (
     'path'              => $main_conf_file,
     'quote_char'        => '',
     'key_val_separator' => '=',
-    'require'           => File[$main_conf_file]
+    'require'           => File[$main_conf_file],
   }
   $main_conf_content = deep_merge($default_config, $noauto, $unmanaged, $additional_config)
 
