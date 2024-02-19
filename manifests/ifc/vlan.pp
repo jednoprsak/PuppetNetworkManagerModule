@@ -9,9 +9,9 @@ define networkmanager::ifc::vlan (
   Optional[String]          $master = undef,
   String                    $slave_type  = 'bridge',
   String                    $vlan_id = undef,
-                            $vlan_flags = 1,
+  Integer[0]                $vlan_flags = 1,
   String                    $vlan_parent = undef,
-  Hash                      $additional_config = {}
+  Hash                      $additional_config = {},
 ) {
   include networkmanager
   Class['networkmanager'] -> Networkmanager::Ifc::Vlan[$title]
@@ -19,16 +19,16 @@ define networkmanager::ifc::vlan (
   if $master {
     $connection_config = {
       connection => {
-        id => $id,
-        uuid => networkmanager::connection_uuid($id),
-        type => $type,
+        id             => $id,
+        uuid           => networkmanager::connection_uuid($id),
+        type           => $type,
         interface-name => $id,
-        slave-type => $slave_type,
-        master => $master,
+        slave-type     => $slave_type,
+        master         => $master,
       },
       vlan => {
-        id => $vlan_id,
-        flags => $vlan_flags,
+        id     => $vlan_id,
+        flags  => $vlan_flags,
         parent => $vlan_parent,
       },
     }
@@ -36,14 +36,14 @@ define networkmanager::ifc::vlan (
   elsif !$master {
     $connection_config = {
       connection => {
-        id => $id,
-        uuid => networkmanager::connection_uuid($id),
-        type => $type,
+        id             => $id,
+        uuid           => networkmanager::connection_uuid($id),
+        type           => $type,
         interface-name => $id,
       },
       vlan => {
-        id => $vlan_id,
-        flags => $vlan_flags,
+        id     => $vlan_id,
+        flags  => $vlan_flags,
         parent => $vlan_parent,
       },
     }
@@ -54,33 +54,21 @@ define networkmanager::ifc::vlan (
     'path'              => "/etc/NetworkManager/system-connections/${id}.nmconnection",
     'quote_char'        => '',
     'key_val_separator' => '=',
-    'require'           => File["/etc/NetworkManager/system-connections/${id}.nmconnection"]
+    'require'           => File["/etc/NetworkManager/system-connections/${id}.nmconnection"],
   }
 
   file {
-     "/etc/NetworkManager/system-connections/${id}.nmconnection":
-     ensure  => $ensure,
-     owner   => 'root',
-     group   => 'root',
-     replace => true,
-     mode    => '0600',
-     content => hash2ini($keyfile_contents,$keyfile_settings);
+    "/etc/NetworkManager/system-connections/${id}.nmconnection":
+      ensure  => $ensure,
+      owner   => 'root',
+      group   => 'root',
+      replace => true,
+      mode    => '0600',
+      content => hash2ini($keyfile_contents,$keyfile_settings);
   }
 
   if $ensure == present {
-
-#  @@exec { "activate ${id}":
-#     command => networkmanager::reload_connection($id, $state),
-#     provider    => 'shell',
-#     group => 'root',
-#     user => 'root',
-#     subscribe => File["/etc/NetworkManager/system-connections/${id}.nmconnection"],
-#     refreshonly => true,
-#     tag => "nmactivate-2022b07${networkmanager::sys_id}";
-#  }
-
-   networkmanager::activate_connection($id, $state)
-
+    networkmanager::activate_connection($id, $state)
   }
 
   include networkmanager::reload

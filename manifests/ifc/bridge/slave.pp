@@ -9,21 +9,21 @@ define networkmanager::ifc::bridge::slave (
   String                    $master = undef,
   String                    $slave_type = 'bridge',
   Stdlib::MAC               $mac_address = undef,
-  Hash                      $additional_config = {}
+  Hash                      $additional_config = {},
 ){
   include networkmanager
   Class['networkmanager'] -> Networkmanager::Ifc::Bridge::Slave[$title]
 
   $connection_config = {
     connection => {
-      id => $id,
-      uuid => networkmanager::connection_uuid($id),
-      type => $type,
-      master => $master,
-      slave-type => $slave_type
+      id         => $id,
+      uuid       => networkmanager::connection_uuid($id),
+      type       => $type,
+      master     => $master,
+      slave-type => $slave_type,
     },
     ethernet => {
-      mac-address => $mac_address
+      mac-address => $mac_address,
     }
   }
 
@@ -32,32 +32,21 @@ define networkmanager::ifc::bridge::slave (
     'path'              => "/etc/NetworkManager/system-connections/${id}.nmconnection",
     'quote_char'        => '',
     'key_val_separator' => '=',
-    'require'           => File["/etc/NetworkManager/system-connections/${id}.nmconnection"]
+    'require'           => File["/etc/NetworkManager/system-connections/${id}.nmconnection"],
   }
 
   file {
-     "/etc/NetworkManager/system-connections/${id}.nmconnection":
-     ensure  => $ensure,
-     owner   => 'root',
-     group   => 'root',
-     replace => true,
-     mode    => '0600',
-     content => hash2ini($keyfile_contents,$keyfile_settings);
+    "/etc/NetworkManager/system-connections/${id}.nmconnection":
+      ensure  => $ensure,
+      owner   => 'root',
+      group   => 'root',
+      replace => true,
+      mode    => '0600',
+      content => hash2ini($keyfile_contents,$keyfile_settings);
   }
 
   if $ensure == present {
-
-#  @@exec { "activate ${id}":
-#     command => networkmanager::reload_connection($id, $state),
-#     provider    => 'shell',
-#     group => 'root',
-#     user => 'root',
-#     subscribe => File["/etc/NetworkManager/system-connections/${id}.nmconnection"],
-#     refreshonly => true,
-#     tag => "nmactivate-2022b07${networkmanager::sys_id}";
-#  }
-   networkmanager::activate_connection($id, $state)
-
+    networkmanager::activate_connection($id, $state)
   }
 
   include networkmanager::reload

@@ -5,10 +5,10 @@
 # @example
 #   include networkmanager::install
 class networkmanager::install (
-  Boolean $install_package = $networkmanager::install_package,
-  String $package_name = $networkmanager::os::package_name,
-  Array $extra_packages = $networkmanager::os::extra_packages,
-  Boolean $install_extra_packages = $networkmanager::install_package,
+  Boolean          $install_package = $networkmanager::install_package,
+  String           $package_name = $networkmanager::os::package_name,
+  Array            $extra_packages = $networkmanager::os::extra_packages,
+  Boolean          $install_extra_packages = $networkmanager::install_package,
   Optional[String] $version = $networkmanager::version,
 ) {
   if $version {
