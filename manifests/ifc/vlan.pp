@@ -3,7 +3,7 @@
 # In the case when you want to specify special not listed parameters you can add them through additional_config hash and it will be merged with other parameters.
 define networkmanager::ifc::vlan (
   Enum['absent', 'present'] $ensure = present,
-  String                    $id = $title, #connection name used during the start via nmcli
+  String[3, 15]             $id = $title, #connection name used during the start via nmcli
   String                    $type = 'vlan',
   Enum['up', 'down']        $state = 'up',
   Optional[String]          $master = undef,

@@ -4,7 +4,7 @@
 define networkmanager::ifc::bond (
   Enum['absent', 'present'] $ensure = present,
   Enum['up', 'down']        $state = 'up',
-  String                    $id = $title, #connection name used during the start via nmcli
+  String[3, 15]             $id = $title, #connection name used during the start via nmcli
   String                    $type = 'bond',
   String                    $ifc_name = $title,
   Optional[String]          $master = undef,
@@ -23,11 +23,11 @@ define networkmanager::ifc::bond (
   Variant[Integer[-1, 2]]   $ipv6_privacy = 0,
   Boolean                   $ipv6_may_fail = true,
   Hash                      $additional_config = {}
-) 
+)
 {
   include networkmanager
   Class['networkmanager'] -> Networkmanager::Ifc::Bond[$title]
-  
+
   $ipv6_method_w = networkmanager::ipv6_disable_version($ipv6_method)
 
   if $master {
@@ -165,7 +165,7 @@ define networkmanager::ifc::bond (
     'require'           => File["/etc/NetworkManager/system-connections/${id}.nmconnection"]
   }
 
-  file { 
+  file {
      "/etc/NetworkManager/system-connections/${id}.nmconnection":
      ensure => $ensure,
      owner  => 'root',
@@ -176,7 +176,7 @@ define networkmanager::ifc::bond (
   }
 
   if $ensure == present {
-  
+
 #  @@exec { "activate ${id}":
 #     command => networkmanager::reload_connection($id, $state),
 #     provider    => 'shell',
@@ -187,7 +187,7 @@ define networkmanager::ifc::bond (
 #     tag => "nmactivate-2022b07${networkmanager::sys_id}";
 #  }
    networkmanager::activate_connection($id, $state)
-  
+
   }
 
   include networkmanager::reload

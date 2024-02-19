@@ -4,7 +4,7 @@
 define networkmanager::ifc::bridge::slave (
   Enum['absent', 'present'] $ensure = present,
   Enum['up', 'down']        $state = 'up',
-  String                    $id = $title, #connection name used during the start via nmcli
+  String[3, 15]             $id = $title, #connection name used during the start via nmcli
   String                    $type = 'ethernet',
   String                    $master = undef,
   String                    $slave_type = 'bridge',
