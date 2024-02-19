@@ -61,11 +61,6 @@ define networkmanager::ifc::bridge (
     }
   }
 
-  $ipv6_dhcp_duid_w = $ipv6_dhcp_duid ? {
-    'auto'  => networkmanager::connection_duid($mac_address),
-    default => $ipv6_dhcp_duid,
-  }
-
   if ($ipv4_method == 'manual' or $ipv4_address) and $ipv4_gateway {
     $ipv4_config = {
       ipv4 => {
@@ -129,13 +124,9 @@ define networkmanager::ifc::bridge (
       }
     }
   }
-  elsif $ipv6_dhcp_duid_w == undef and ($ipv6_method_w == 'auto' or $ipv6_method_w == 'dhcp' )
+  elsif $ipv6_dhcp_duid == undef and ($ipv6_method_w == 'auto' or $ipv6_method_w == 'dhcp' ) and 'present' == $ensure
   {
-    $ipv6_config = {
-      ipv6 => {
-        method => 'ignore'
-      }
-    }
+    fail("IPv6 method for connection '${id}' is '${ipv6_method_w}' but no \$ipv6_dhcp_duid was supplied.")
   }
   elsif $ipv6_method_w == 'auto' or ipv6_method_w == 'dhcp'
   {
@@ -147,7 +138,7 @@ define networkmanager::ifc::bridge (
         ip6-privacy => $ipv6_privacy,
         may-fail => $ipv6_may_fail,
         dns => $ipv6_dns,
-        dhcp-duid => $ipv6_dhcp_duid_w
+        dhcp-duid => $ipv6_dhcp_duid
       }
    }
   }
@@ -169,11 +160,11 @@ define networkmanager::ifc::bridge (
 
   file {
      "/etc/NetworkManager/system-connections/${id}.nmconnection":
-     ensure => $ensure,
-     owner  => 'root',
-     group  => 'root',
-     replace   => true,
-     mode   => '0600',
+     ensure  => $ensure,
+     owner   => 'root',
+     group   => 'root',
+     replace => true,
+     mode    => '0600',
      content => hash2ini($keyfile_contents,$keyfile_settings);
   }
 
