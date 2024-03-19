@@ -2,7 +2,7 @@
 define networkmanager::ifc::fallback(
   Enum['absent', 'present'] $ensure = present,
   Enum['up', 'down']        $state = 'up',
-  String[3, 15]             $id = $title,
+  String                    $id = $title,
   Hash                      $config = {}, #pozaduje tento hash
 ) {
   include networkmanager
