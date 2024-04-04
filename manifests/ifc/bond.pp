@@ -9,6 +9,7 @@ define networkmanager::ifc::bond (
   String[3, 15]                                                 $ifc_name = $title,
   Optional[String]                                              $master = undef,
   String                                                        $bond_mode = 'balance-rr',
+  Optional[Stdlib::MAC]                                         $mac_address = undef,
   Enum['auto','dhcp','manual','disabled','link-local']          $ipv4_method = 'auto',
   Optional[Networkmanager::IPV4_CIDR]                           $ipv4_address = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet]                   $ipv4_gateway = undef,
@@ -55,6 +56,13 @@ define networkmanager::ifc::bond (
         mode => $bond_mode,
       }
     }
+  }
+
+  if 'auto' == $ipv6_dhcp_duid and $mac_address {
+    $ipv6_dhcp_duid_w = networkmanager::connection_duid($mac_address)
+  }
+  else {
+    $ipv6_dhcp_duid_w = $ipv6_dhcp_duid
   }
 
 
@@ -121,7 +129,7 @@ define networkmanager::ifc::bond (
       }
     }
   }
-  elsif $ipv6_dhcp_duid == undef and ($ipv6_method_w == 'auto' or $ipv6_method_w == 'dhcp' ) and 'present' == $ensure {
+  elsif $ipv6_dhcp_duid_w == undef and ($ipv6_method_w == 'auto' or $ipv6_method_w == 'dhcp' ) and 'present' == $ensure {
     fail("IPv6 method for connection '${id}' is '${ipv6_method_w}' but no \$ipv6_dhcp_duid was supplied.")
   }
   elsif $ipv6_method_w == 'auto' or ipv6_method_w == 'dhcp' {
@@ -133,7 +141,7 @@ define networkmanager::ifc::bond (
         ip6-privacy   => $ipv6_privacy,
         may-fail      => $ipv6_may_fail,
         dns           => $ipv6_dns,
-        dhcp-duid     => $ipv6_dhcp_duid,
+        dhcp-duid     => $ipv6_dhcp_duid_w,
       }
     }
   }

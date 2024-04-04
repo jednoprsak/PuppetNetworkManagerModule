@@ -9,6 +9,7 @@ define networkmanager::ifc::bridge (
   Enum['up', 'down']                                            $state = 'up',
   Optional[String]                                              $master = undef,
   Boolean                                                       $bridge_stp = true,
+  Optional[Stdlib::MAC]                                         $mac_address = undef,
   Integer[0]                                                    $bridge_forward_delay = 15,
   Enum['auto','dhcp','manual','disabled','link-local']          $ipv4_method = 'auto',
   Optional[Networkmanager::IPV4_CIDR]                           $ipv4_address = undef,
@@ -24,8 +25,7 @@ define networkmanager::ifc::bridge (
   Integer[-1, 2]                                                $ipv6_privacy = 0,
   Boolean                                                       $ipv6_may_fail = true,
   Hash                                                          $additional_config = {},
-)
-{
+){
   include networkmanager
   Class['networkmanager'] -> Networkmanager::Ifc::Bridge[$title]
 
@@ -59,6 +59,13 @@ define networkmanager::ifc::bridge (
         forward-delay => $bridge_forward_delay,
       }
     }
+  }
+
+  if 'auto' == $ipv6_dhcp_duid and $mac_address {
+    $ipv6_dhcp_duid_w = networkmanager::connection_duid($mac_address)
+  }
+  else {
+    $ipv6_dhcp_duid_w = $ipv6_dhcp_duid
   }
 
   if ($ipv4_method == 'manual' or $ipv4_address) and $ipv4_gateway {
@@ -124,7 +131,7 @@ define networkmanager::ifc::bridge (
       }
     }
   }
-  elsif $ipv6_dhcp_duid == undef and ($ipv6_method_w == 'auto' or $ipv6_method_w == 'dhcp' ) and 'present' == $ensure {
+  elsif $ipv6_dhcp_duid_w == undef and ($ipv6_method_w == 'auto' or $ipv6_method_w == 'dhcp' ) and 'present' == $ensure {
     fail("IPv6 method for connection '${id}' is '${ipv6_method_w}' but no \$ipv6_dhcp_duid was supplied.")
   }
   elsif $ipv6_method_w == 'auto' or ipv6_method_w == 'dhcp' {
@@ -136,7 +143,7 @@ define networkmanager::ifc::bridge (
         ip6-privacy   => $ipv6_privacy,
         may-fail      => $ipv6_may_fail,
         dns           => $ipv6_dns,
-        dhcp-duid     => $ipv6_dhcp_duid,
+        dhcp-duid     => $ipv6_dhcp_duid_w,
       }
     }
   }
