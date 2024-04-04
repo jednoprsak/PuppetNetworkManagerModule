@@ -26,7 +26,7 @@ You need a few additional libraries like hash2stuff.
 
 ### Beginning with networkmanager
 
-When you want to begin with NetworkManager, you need to be clever as devil, but 
+When you want to begin with NetworkManager, you need to be clever as devil, but
 our module will help you create keyfiles and push them inside that oven of hell.
 
 ## Usage
@@ -80,13 +80,18 @@ networkmanager::ifc::bond::slave { 'bondslaveens8':
   mac_address => 'MAC_ADDRESS',
   master  => 'bondmaster2',
 }
-  
+
 networkmanager::ifc::bond::slave { 'bondslaveens9':
   ensure => present,
   mac_address => 'MAC_ADDRESS',
   master  => 'bondmaster2',
 }
 ```
+
+## Connection id length
+The `connection.id` parametre is limited by deafult to 15 charactes, because is by deafult used also as the interface name.
+The interface name has upper limit of 15 characters set by kernel.
+You can override this limit by setting the $networkmanager::max_length_of_connection_id to the value you like but then you need to set, where applicable, the `connection.interface-name` to something what is less than 16 characters long.
 
 ## Contact
 

@@ -1,9 +1,9 @@
 # This defined resource creates user defined keyfile
 define networkmanager::ifc::fallback(
-  Enum['absent', 'present'] $ensure = present,
-  Enum['up', 'down']        $state = 'up',
-  String[3, 15]             $id = $title,
-  Hash                      $config = {}, #pozaduje tento hash
+  Enum['absent', 'present']                               $ensure = present,
+  Enum['up', 'down']                                      $state = 'up',
+  String[3, $networkmanager::max_length_of_connection_id] $id = $title,
+  Hash                                                    $config = {}, #pozaduje tento hash
 ) {
   include networkmanager
   Networkmanager::Ifc::Fallback[$title] ~> Class['networkmanager']
@@ -54,6 +54,10 @@ define networkmanager::ifc::fallback(
 
 
   $params_e = deep_merge($needed_params, $config, $non_uuid_parents, $non_uuid_masters)
+
+  if 'connection' in $params_e and 'interface-name' in $params_e['connection'] and 15 < $params_e['connection']['interface-name'].length() {
+    fail("The 'connection.interface-name' for connection '${id}' can not be longer than 15 characters!")
+  }
 
   $keyfile_settings = {
     'path'              => $confilename,

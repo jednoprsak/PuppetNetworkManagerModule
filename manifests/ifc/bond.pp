@@ -4,7 +4,7 @@
 define networkmanager::ifc::bond (
   Enum['absent', 'present']                                     $ensure = present,
   Enum['up', 'down']                                            $state = 'up',
-  String[3, 15]                                                 $id = $title, #connection name used during the start via nmcli
+  String[3, $networkmanager::max_length_of_connection_id]       $id = $title, #connection name used during the start via nmcli
   String                                                        $type = 'bond',
   String[3, 15]                                                 $ifc_name = $title,
   Optional[String]                                              $master = undef,

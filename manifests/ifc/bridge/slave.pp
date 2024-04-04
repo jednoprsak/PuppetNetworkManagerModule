@@ -2,14 +2,14 @@
 # You can read parameters below.
 # In the case when you want to specify special not listed parameters you can add them through additional_config hash and it will be merged with other parameters.
 define networkmanager::ifc::bridge::slave (
-  Enum['absent', 'present'] $ensure = present,
-  Enum['up', 'down']        $state = 'up',
-  String[3, 15]             $id = $title, #connection name used during the start via nmcli
-  String                    $type = 'ethernet',
-  String                    $master = undef,
-  String                    $slave_type = 'bridge',
-  Stdlib::MAC               $mac_address = undef,
-  Hash                      $additional_config = {},
+  Enum['absent', 'present']                               $ensure = present,
+  Enum['up', 'down']                                      $state = 'up',
+  String[3, $networkmanager::max_length_of_connection_id] $id = $title, #connection name used during the start via nmcli
+  String                                                  $type = 'ethernet',
+  String                                                  $master = undef,
+  String                                                  $slave_type = 'bridge',
+  Stdlib::MAC                                             $mac_address = undef,
+  Hash                                                    $additional_config = {},
 ){
   include networkmanager
   Class['networkmanager'] -> Networkmanager::Ifc::Bridge::Slave[$title]
