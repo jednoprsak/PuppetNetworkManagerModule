@@ -21,6 +21,7 @@ class networkmanager (
   Variant[Boolean, Enum['stub'], Undef] $use_internal_resolv_conf = undef,
   Hash                                  $additional_config = {},
   Array[String]                         $plugins = ['keyfile'],
+  Integer[3]                            $max_length_of_connection_id = 15,
 )
 {
   $sys_id = [

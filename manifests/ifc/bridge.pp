@@ -3,14 +3,14 @@
 # In the case when you want to specify special not listed parameters you can add them through additional_config hash and it will be merged with other parameters.
 define networkmanager::ifc::bridge (
   Enum['absent', 'present']                                     $ensure = present,
-  String[3, 15]                                                 $id = $title, #connection name used during the start via nmcli
+  String[3, $networkmanager::max_length_of_connection_id]       $id = $title, #connection name used during the start via nmcli
   String                                                        $type = 'bridge',
   String[3, 15]                                                 $ifc_name = $title,
   Enum['up', 'down']                                            $state = 'up',
   Optional[String]                                              $master = undef,
   Boolean                                                       $bridge_stp = true,
-  Integer[1]                                                    $bridge_forward_delay = 15,
   Optional[Stdlib::MAC]                                         $mac_address = undef,
+  Integer[0]                                                    $bridge_forward_delay = 15,
   Enum['auto','dhcp','manual','disabled','link-local']          $ipv4_method = 'auto',
   Optional[Networkmanager::IPV4_CIDR]                           $ipv4_address = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet]                   $ipv4_gateway = undef,
