@@ -2,16 +2,16 @@
 # You can read parameters below.
 # In the case when you want to specify special not listed parameters you can add them through additional_config hash and it will be merged with other parameters.
 define networkmanager::ifc::vlan (
-  Enum['absent', 'present'] $ensure = present,
-  String[3, 15]             $id = $title, #connection name used during the start via nmcli
-  String                    $type = 'vlan',
-  Enum['up', 'down']        $state = 'up',
-  Optional[String]          $master = undef,
-  String                    $slave_type  = 'bridge',
-  String                    $vlan_id = undef,
-  Integer[0]                $vlan_flags = 1,
-  String                    $vlan_parent = undef,
-  Hash                      $additional_config = {},
+  Integer[1, 4096]                                        $vlan_id,
+  Enum['absent', 'present']                               $ensure = present,
+  String[3, $networkmanager::max_length_of_connection_id] $id = $title, #connection name used during the start via nmcli
+  String                                                  $type = 'vlan',
+  Enum['up', 'down']                                      $state = 'up',
+  Optional[String]                                        $master = undef,
+  String                                                  $slave_type  = 'bridge',
+  Integer[0]                                              $vlan_flags = 1,
+  String                                                  $vlan_parent = undef,
+  Hash                                                    $additional_config = {},
 ) {
   include networkmanager
   Class['networkmanager'] -> Networkmanager::Ifc::Vlan[$title]
