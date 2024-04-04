@@ -9,7 +9,7 @@ define networkmanager::ifc::bridge (
   Enum['up', 'down']                                            $state = 'up',
   Optional[String]                                              $master = undef,
   Boolean                                                       $bridge_stp = true,
-  Integer[1]                                                    $bridge_forward_delay = 15,
+  Integer[0]                                                    $bridge_forward_delay = 15,
   Enum['auto','dhcp','manual','disabled','link-local']          $ipv4_method = 'auto',
   Optional[Networkmanager::IPV4_CIDR]                           $ipv4_address = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet]                   $ipv4_gateway = undef,
