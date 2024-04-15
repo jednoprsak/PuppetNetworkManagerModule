@@ -1,15 +1,16 @@
-#This class configures file /etc/NetworkManager/NetworkManager.conf,
-#sets up whether to erase unmanaged keyfiles, and adds no-auto-default option
+# This class configures file /etc/NetworkManager/NetworkManager.conf,
+# sets up whether to erase unmanaged keyfiles, and adds no-auto-default option
 # inside config file according to no_auto_default parameter defined at the entrance
 # of networkmanager class.
 # It is not recomanded to use it without main networkmanager class.
+
 class networkmanager::config (
   Boolean                               $erase_unmanaged_keyfiles = $networkmanager::erase_unmanaged_keyfiles,
   Variant[Boolean,String]               $no_auto_default = $networkmanager::no_auto_default,
   Array[String]                         $unmanaged_devices = $networkmanager::unmanaged_devices,
-  Hash                                  $additional_config = $networkmanager::additional_config,
   Array[String]                         $plugins = $networkmanager::plugins,
   Variant[Boolean, Enum['stub'], Undef] $use_internal_resolv_conf = $networkmanager::use_internal_resolv_conf,
+  Hash                                  $additional_config = $networkmanager::additional_config,
 ){
   $main_conf_file = '/etc/NetworkManager/NetworkManager.conf'
   if $unmanaged_devices != [] {
@@ -97,5 +98,4 @@ class networkmanager::config (
       purge   => $erase_unmanaged_keyfiles,
       mode    => '0600';
   }
-
 }

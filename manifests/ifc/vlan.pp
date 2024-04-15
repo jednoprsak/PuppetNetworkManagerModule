@@ -1,74 +1,74 @@
-# This defined resource creates vlan keyfile.
-# You can read parameters below.
-# In the case when you want to specify special not listed parameters you can add them through additional_config hash and it will be merged with other parameters.
+# This defined resource creates the vlan connection keyfile.
+# Parametres:
+#   $vlan_id = id of the desired vlan REQUIRED
+#   $vlan_parent = $id or UUID of the parent for this interface REQUIRED
+#   $ensure = state of the interface config DEFAULT: present
+#   $state = state of the interface (UP/DOWN) not relevant when $ensure == 'absent' DEFAULT: 'up'
+#   $id = the name of the connection DEFAULT: $title of the resource
+#   $interface_name = name of the connection interface REQUIRED DEFAULT: $title of the resource
+#   $master = $id or UUID of the connection maste if applicable
+#   $slave_type = type which this port should assume if set as slave (IGNORED if $master == undef)
+#   $vlan_flags = flags for the 802.1Q vlan protocol DEFAULT: 1
+#   $addtional_config = Other not covered configuration
+#     In the case when you want to specify special not listed parameters you can add them through
+#     $additional_config hash and it will be merged with other parameters.
+#     The additional_config has the HIGHEST priority when merged!
+#     ie: it will override the defined values of the connection in case of the conflict
+
 define networkmanager::ifc::vlan (
-  Integer[1, 4096]                                        $vlan_id,
-  Enum['absent', 'present']                               $ensure = present,
-  String[3, $networkmanager::max_length_of_connection_id] $id = $title, #connection name used during the start via nmcli
-  String                                                  $type = 'vlan',
-  Enum['up', 'down']                                      $state = 'up',
-  Optional[String]                                        $master = undef,
-  String                                                  $slave_type  = 'bridge',
-  Integer[0]                                              $vlan_flags = 1,
-  String                                                  $vlan_parent = undef,
-  Hash                                                    $additional_config = {},
+  Integer[1, 4094]          $vlan_id,
+  Optional[String]          $vlan_parent,
+  Enum['absent', 'present'] $ensure = present,
+  Enum['up', 'down']        $state = 'up',
+  String                    $id = $title,
+  String[3, 15]             $interface_name = $title,
+  Optional[String]          $master = undef,
+  String                    $slave_type  = 'bridge',
+  Integer[0]                $vlan_flags = 1,
+  Hash                      $additional_config = {},
 ) {
   include networkmanager
   Class['networkmanager'] -> Networkmanager::Ifc::Vlan[$title]
 
-  if $master {
-    $connection_config = {
+  if $id !~ String[3, $networkmanager::max_length_of_connection_id] {
+    fail("The connection \$id must have length from 3 to ${networkmanager::max_length_of_connection_id} characters")
+  }
+
+  $uuid = networkmanager::connection_uuid($id)
+
+  $master_config = $master ? {
+    undef   => {},
+    default => {
       connection => {
-        id             => $id,
-        uuid           => networkmanager::connection_uuid($id),
-        type           => $type,
-        interface-name => $id,
+        master => networkmanager::connection_uuid($master),
         slave-type     => $slave_type,
-        master         => $master,
-      },
-      vlan => {
-        id     => $vlan_id,
-        flags  => $vlan_flags,
-        parent => $vlan_parent,
-      },
-    }
-  }
-  elsif !$master {
-    $connection_config = {
-      connection => {
-        id             => $id,
-        uuid           => networkmanager::connection_uuid($id),
-        type           => $type,
-        interface-name => $id,
-      },
-      vlan => {
-        id     => $vlan_id,
-        flags  => $vlan_flags,
-        parent => $vlan_parent,
-      },
-    }
+      }
+    },
   }
 
-  $keyfile_contents = deep_merge($connection_config, $additional_config)
-  $keyfile_settings = {
-    'path'              => "/etc/NetworkManager/system-connections/${id}.nmconnection",
-    'quote_char'        => '',
-    'key_val_separator' => '=',
-    'require'           => File["/etc/NetworkManager/system-connections/${id}.nmconnection"],
+  $connection_config = {
+    connection => {
+      id             => $id,
+      uuid           => $uuid,
+      type           => 'vlan',
+      interface-name => $interface_name,
+    },
+    vlan => {
+      id     => $vlan_id,
+      flags  => $vlan_flags,
+      parent => networkmanager::connection_uuid($vlan_parent),
+    },
   }
 
-  file {
-    "/etc/NetworkManager/system-connections/${id}.nmconnection":
+  $keyfile_contents = deep_merge($master_config, $connection_config, $additional_config)
+  networkmanager::connection_keyfile_manage {
+    $id:
       ensure  => $ensure,
-      owner   => 'root',
-      group   => 'root',
-      replace => true,
-      mode    => '0600',
-      content => hash2ini($keyfile_contents,$keyfile_settings);
+      content => $keyfile_contents;
   }
 
   if $ensure == present {
-    networkmanager::activate_connection($id, $state)
+    networkmanager::activate_connection($uuid, $id, $state)
   }
 
   include networkmanager::reload

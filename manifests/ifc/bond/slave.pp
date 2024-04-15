@@ -1,52 +1,66 @@
 # This defined resource creates bond slave keyfile.
-# You can read parameters below.
-# In the case when you want to specify special not listed parameters you can add them through additional_config hash and it will be merged with other parameters.
+# Parametres:
+#   $master = $id or UUID of the master interface uned which this slave should operate REQUIRED
+#   $ensure = state of the interface config DEFAULT: present
+#   $state = state of the interface (UP/DOWN) not relevant when $ensure == 'absent' DEFAULT: 'up'
+#   $id = the name of the connection DEFAULT: $title of the resource
+#   $type = connection type DEFAULT: ethernet
+#   $mac_address = the mac of the interface for the connection REQUIRED IF $ifc_name was not supplied
+#   $inteface_name = name of the connection interface REQUIRED IF $mac_address was not supplied
+#   $addtional_config = Other not covered configuration
+#     In the case when you want to specify special not listed parameters you can add them through
+#     $additional_config hash and it will be merged with other parameters.
+#     The additional_config has the HIGHEST priority when merged!
+#     ie: it will override the defined values of the connection in case of the conflict
+
 define networkmanager::ifc::bond::slave (
-  Enum['absent', 'present']                               $ensure = present,
-  Enum['up', 'down']                                      $state = 'up',
-  String[3, $networkmanager::max_length_of_connection_id] $id = $title, #connection name used during the start via nmcli
-  String                                                  $type = 'ethernet',
-  String                                                  $master = undef,
-  String                                                  $slave_type = 'bond',
-  Stdlib::MAC                                             $mac_address = undef,
-  Hash                                                    $additional_config = {},
+  String                    $master,
+  Enum['absent', 'present'] $ensure = present,
+  Enum['up', 'down']        $state = 'up',
+  String                    $id = $title,
+  String                    $type = 'ethernet',
+  Optional[Stdlib::MAC]     $mac_address = undef,
+  Optional[String[3, 15]]   $interface_name = undef,
+  Hash                      $additional_config = {},
 ){
   include networkmanager
   Class['networkmanager'] -> Networkmanager::Ifc::Bond::Slave[$title]
 
+  if $id !~ String[3, $networkmanager::max_length_of_connection_id] {
+    fail("The connection \$id must have length from 3 to ${networkmanager::max_length_of_connection_id} characters")
+  }
+
+  $uuid = networkmanager::connection_uuid($id)
+
+  $int_mac_config = networkmanager::validate_ifc_name_and_mac(
+      $name,
+      $title,
+      $mac_address,
+      $interface_name
+    )
+
+  $master_uuid = networkmanager::connection_uuid($master)
+
   $connection_config = {
     connection => {
       id         => $id,
-      uuid       => networkmanager::connection_uuid($id),
+      uuid       => $uuid,
       type       => $type,
-      master     => $master,
-      slave-type => $slave_type,
-    },
-    ethernet => {
-      mac-address => $mac_address,
+      master     => $master_uuid,
+      slave-type => 'bond',
     }
   }
 
-  $keyfile_contents = deep_merge($connection_config, $additional_config)
-  $keyfile_settings = {
-    'path'              => "/etc/NetworkManager/system-connections/${id}.nmconnection",
-    'quote_char'        => '',
-    'key_val_separator' => '=',
-    'require'           => File["/etc/NetworkManager/system-connections/${id}.nmconnection"],
-  }
+  $keyfile_contents = deep_merge($int_mac_config, $connection_config, $additional_config)
 
-  file {
-    "/etc/NetworkManager/system-connections/${id}.nmconnection":
+  networkmanager::connection_keyfile_manage {
+    $id:
       ensure  => $ensure,
-      owner   => 'root',
-      group   => 'root',
-      replace => true,
-      mode    => '0600',
-      content => hash2ini($keyfile_contents,$keyfile_settings);
+      content => $keyfile_contents;
   }
 
   if $ensure == present {
-    networkmanager::activate_connection($id, $state)
+    networkmanager::activate_connection($uuid, $id, $state)
   }
 
   include networkmanager::reload

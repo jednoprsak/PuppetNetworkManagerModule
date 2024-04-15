@@ -1,35 +1,65 @@
-# This defined resource creates main connection keyfile.
-# You can read parameters below.
-# In the case when you want to specify special not listed parameters you can add them through additional_config hash and it will be merged with other parameters.
+# This defined resource creates the connection keyfile.
+# Parametres:
+#   $ensure = state of the interface config DEFAULT: present
+#   $state = state of the interface (UP/DOWN) not relevant when $ensure == 'absent' DEFAULT: 'up'
+#   $id = the name of the connection DEFAULT: $title of the resource
+#   $interface_name = name of the connection interface REQUIRED DEFAULT: $title of the resource
+#   $mac_address = the mac of the interface for the connection
+#   $master = $id or UUID of the connection maste if applicable
+#   $type = the type of the connection DEFAULT: 'ethernet'
+#   $ipv4_method = what method to use to get an IPv4 address DEFAULT: 'auto'
+#   $ipv4_address = semicolon separated list of the IPv4 addresses to assign to the interface in format 127.0.0.1/8
+#   $ipv4_gateway = the IPv4 gateway for the connection
+#   $ipv4_dns = semicolon seperated list of the dns servers for the interface
+#   $ipv4_may_fail = is it ik that the IPv4 config fails? DEFAULT: true
+#   $ipv6_method = what method to use to get an ipv6 address DEFAULT: 'auto'
+#   $ipv6_address = semicolon separated list of the ipv6 addresses to assign to the interface in format aa::bb:cc/64
+#   $ipv6_gateway = the ipv6 gateway for the connection
+#   $ipv6_dns = semicolon seperated list of the dns servers for the interface
+#   $ipv6_dhcp_duid = IPv6 DHCP DUID 'auto' value generates it with module from mac of the interface
+#   $ipv6_addr_gen_mode = IPv6 method for generating of automatic interface address
+#   $ipv6_privacy = should be the generated automatic address more private
+#   $ipv6_may_fail = is it ik that the ipv6 config fails? DEFAULT: true
+#   $addtional_config = Other not covered configuration
+#     In the case when you want to specify special not listed parameters you can add them through
+#     $additional_config hash and it will be merged with other parameters.
+#     The additional_config has the HIGHEST priority when merged!
+#     ie: it will override the defined values of the connection in case of the conflict
+
 define networkmanager::ifc::connection(
-  Enum['absent', 'present']                                     $ensure = present,
-  String[3, $networkmanager::max_length_of_connection_id]       $id = $title, #connection name used during the start via nmcli
-  String                                                        $type = 'ethernet',
-  Optional[String[3, 15]]                                       $interface_name = undef,
-  Optional[Stdlib::MAC]                                         $mac_address = undef,
-  Enum['up', 'down']                                            $state = 'up',
-  Optional[String]                                              $master = undef,
-  Enum['auto','dhcp','manual','disabled','link-local']          $ipv4_method = 'auto',
-  Optional[Networkmanager::IPV4_CIDR]                           $ipv4_address = undef,
-  Optional[Networkmanager::DNS_IPV4]                            $ipv4_dns = undef,
-  Boolean                                                       $ipv4_may_fail = true,
-  Optional[Stdlib::IP::Address::V4::Nosubnet]                   $ipv4_gateway = undef,
-  Enum['auto','dhcp','manual','ignore','link-local','disabled'] $ipv6_method = 'auto',
-  Optional[Stdlib::IP::Address::V6::CIDR]                       $ipv6_address = undef,
-  Optional[Stdlib::IP::Address::V6::Nosubnet]                   $ipv6_gateway = undef,
-  Optional[Networkmanager::DNS_IPV6]                            $ipv6_dns = undef,
-  Optional[String]                                              $ipv6_dhcp_duid = undef,
-  Integer[0, 1]                                                 $ipv6_addr_gen_mode = 0,
-  Integer[-1, 2]                                                $ipv6_privacy = 0,
-  Boolean                                                       $ipv6_may_fail = true,
-  Hash                                                          $additional_config = {},
+  Enum['absent', 'present']                                          $ensure = present,
+  Enum['up', 'down']                                                 $state = 'up',
+  String                                                             $id = $title,
+  Optional[String[3, 15]]                                            $interface_name = undef,
+  Optional[Stdlib::MAC]                                              $mac_address = undef,
+  Optional[String]                                                   $master = undef,
+  String                                                             $type = 'ethernet',
+  Enum['auto', 'dhcp', 'manual', 'disabled', 'link-local']           $ipv4_method = 'auto',
+  Optional[Networkmanager::IPV4_CIDR]                                $ipv4_address = undef,
+  Optional[Networkmanager::DNS_IPV4]                                 $ipv4_dns = undef,
+  Boolean                                                            $ipv4_may_fail = true,
+  Optional[Stdlib::IP::Address::V4::Nosubnet]                        $ipv4_gateway = undef,
+  Enum['auto', 'dhcp', 'manual', 'ignore', 'link-local', 'disabled'] $ipv6_method = 'auto',
+  Optional[Stdlib::IP::Address::V6::CIDR]                            $ipv6_address = undef,
+  Optional[Stdlib::IP::Address::V6::Nosubnet]                        $ipv6_gateway = undef,
+  Optional[Networkmanager::DNS_IPV6]                                 $ipv6_dns = undef,
+  Optional[String]                                                   $ipv6_dhcp_duid = undef,
+  Integer[0, 3]                                                      $ipv6_addr_gen_mode = 0,
+  Integer[-1, 2]                                                     $ipv6_privacy = 0,
+  Boolean                                                            $ipv6_may_fail = true,
+  Hash                                                               $additional_config = {},
 ){
   include networkmanager
   Class['networkmanager'] -> Networkmanager::Ifc::Connection[$title]
+  if $id !~ String[3, $networkmanager::max_length_of_connection_id] {
+    fail("The connection \$id must have length from 3 to ${networkmanager::max_length_of_connection_id} characters")
+  }
 
   if $type == 'ethernet' and $interface_name == undef and $mac_address == undef {
-    fail("for ethernet connection ${id} either interface_name or mac_address is required")
+    fail("For ethernet connection ${id} either interface_name or mac_address is required")
   }
+
+  $uuid = networkmanager::connection_uuid($id)
 
   $ipv6_method_w = networkmanager::ipv6_disable_version($ipv6_method)
 
@@ -41,7 +71,7 @@ define networkmanager::ifc::connection(
   }
 
   if $master {
-    $master_config = { master => $master }
+    $master_config = { master => networkmanager::connection_uuid($master) }
   }
   else {
     $master_config = {}
@@ -50,16 +80,16 @@ define networkmanager::ifc::connection(
   $connection_config = {
     connection => {
       id   => $id,
-      uuid => networkmanager::connection_uuid($id),
+      uuid => $uuid,
       type => $type,
-    } + $interface_name_config + $master_config,
+    },
   }
 
   if $mac_address {
-    $ethernet_config = { ethernet => { mac-address => $mac_address } }
+    $mac_config = { ethernet => { mac-address => $mac_address } }
   }
   else {
-    $ethernet_config = {}
+    $mac_config = {}
   }
 
   $ipv6_dhcp_duid_w = $ipv6_dhcp_duid ? {
@@ -67,120 +97,95 @@ define networkmanager::ifc::connection(
     default => $ipv6_dhcp_duid,
   }
 
-  if ($ipv4_method == 'manual' or $ipv4_address) and $ipv4_gateway {
-    $ipv4_config = {
-      ipv4 => {
-        method   => $ipv4_method,
-        address  => $ipv4_address,
-        gateway  => $ipv4_gateway,
-        dns      => $ipv4_dns,
-        may-fail => $ipv4_may_fail,
-      }
-    }
+  $ipv4_config = { ipv4 => { method => $ipv4_method } }
+
+  $ipv4_may_fail_config = { ipv4 => { may-fail => $ipv4_may_fail } }
+
+  $ipv4_gw_config = $ipv4_gateway ? {
+    undef   => {},
+    default => { ipv4 => { gateway => $ipv4_gateway } },
   }
-  elsif ($ipv4_method == 'manual' or $ipv4_address) and !$ipv4_gateway {
-    $ipv4_config = {
-      ipv4 => {
-        method   => $ipv4_method,
-        address  => $ipv4_address,
-        dns      => $ipv4_dns,
-        may-fail => $ipv4_may_fail,
-      }
-    }
+
+  $ipv4_address_config = $ipv4_address ? {
+    undef   => {},
+    default => { ipv4 => { address  => $ipv4_address } },
   }
-  elsif $ipv4_method == 'auto' or $ipv4_method == 'dhcp' {
-    $ipv4_config = {
-      ipv4 => {
-        method   => $ipv4_method,
-        dns      => $ipv4_dns,
-        may-fail => $ipv4_may_fail,
-      }
-    }
+
+  $ipv4_dns_config = $ipv4_dns ? {
+    undef   => {},
+    default => { ipv4 => { dns  => $ipv4_dns } },
   }
-  elsif $ipv4_method == 'disabled' or ipv4_method == 'link-local' {
-    $ipv4_config = {
-      ipv4 => {
-        method => $ipv4_method,
-      }
+
+  $ipv6_config = {
+    ipv6 => {
+      method        => $ipv6_method_w,
+      addr-gen-mode => $ipv6_addr_gen_mode,
+      ip6-privacy   => $ipv6_privacy,
     }
   }
 
-  if ($ipv6_method_w == 'manual' or $ipv6_address) and $ipv6_gateway {
-    $ipv6_config = {
+  $ipv6_may_fail_config = { ipv6 => { may-fail => $ipv6_may_fail } }
+
+  $ipv6_gw_config = $ipv6_gateway ? {
+    undef   => {},
+    default => { ipv6 => { gateway => $ipv6_gateway } },
+  }
+
+  $ipv6_address_config = $ipv6_address ? {
+    undef   => {},
+    default => { ipv6 => { address  => $ipv6_address } },
+  }
+
+  $ipv6_dns_config = $ipv6_dns ? {
+    undef   => {},
+    default => { ipv6 => { dns  => $ipv6_dns } },
+  }
+
+  if $ipv6_dhcp_duid_w == undef
+    and $ipv6_method_w in ['auto', 'dhcp']
+    and 'present' == $ensure
+    and 'up' == $state {
+      fail("IPv6 method for connection '${id}' is '${ipv6_method_w}' but no \$ipv6_dhcp_duid was supplied.")
+  }
+  elsif $ipv6_method_w in ['auto', 'dhcp'] and 'up' == $state {
+    $ipv6_duid_config = {
       ipv6 => {
-        method => 'manual',
-        address => $ipv6_address,
-        gateway => $ipv6_gateway,
-        addr-gen-mode => $ipv6_addr_gen_mode,
-        ip6-privacy => $ipv6_privacy,
-        may-fail => $ipv6_may_fail,
-        dns => $ipv6_dns,
+        dhcp-duid => $ipv6_dhcp_duid_w,
       }
     }
   }
-  elsif ($ipv6_method_w == 'manual' or $ipv6_address) and !$ipv6_gateway {
-    $ipv6_config = {
-      ipv6 => {
-        method => 'manual',
-        address => $ipv6_address,
-        addr-gen-mode => $ipv6_addr_gen_mode,
-        ip6-privacy => $ipv6_privacy,
-        may-fail => $ipv6_may_fail,
-        dns => $ipv6_dns,
-      }
-    }
-  }
-  elsif $ipv6_dhcp_duid_w == undef and ($ipv6_method_w == 'auto' or $ipv6_method_w == 'dhcp' ) {
-    $ipv6_config = {
-      ipv6 => {
-        method => 'ignore'
-      }
-    }
-  }
-  elsif $ipv6_method_w == 'auto' or ipv6_method_w == 'dhcp' {
-    $ipv6_config = {
-      ipv6 => {
-        method        => $ipv6_method_w,
-        address       => $ipv6_address,
-        addr-gen-mode => $ipv6_addr_gen_mode,
-        ip6-privacy   => $ipv6_privacy,
-        may-fail      => $ipv6_may_fail,
-        dns           => $ipv6_dns,
-        dhcp-duid     => $ipv6_dhcp_duid_w,
-      }
-    }
-  }
-  elsif $ipv6_method_w in ['ignore','link-local','disabled'] {
-    $ipv6_config = {
-      ipv6 => {
-        method => $ipv6_method_w,
-      }
-    }
+  else {
+    $ipv6_duid_config = {}
   }
 
 
-  $keyfile_contents = deep_merge($connection_config, $ethernet_config, $ipv4_config, $ipv6_config, $additional_config)
+  $keyfile_contents = deep_merge(
+      $interface_name_config,
+      $master_config,
+      $connection_config,
+      $mac_config,
+      $ipv4_config,
+      $ipv4_may_fail_config,
+      $ipv4_gw_config,
+      $ipv4_address_config,
+      $ipv4_dns_config,
+      $ipv6_config,
+      $ipv6_may_fail_config,
+      $ipv6_gw_config,
+      $ipv6_address_config,
+      $ipv6_dns_config,
+      $ipv6_duid_config,
+      $additional_config
+    )
 
-
-  $keyfile_settings = {
-    'path'              => "/etc/NetworkManager/system-connections/${id}.nmconnection",
-    'quote_char'        => '',
-    'key_val_separator' => '=',
-    'require'           => File["/etc/NetworkManager/system-connections/${id}.nmconnection"],
-  }
-
-  file {
-    "/etc/NetworkManager/system-connections/${id}.nmconnection":
+  networkmanager::connection_keyfile_manage {
+    $id:
       ensure  => $ensure,
-      owner   => 'root',
-      group   => 'root',
-      replace => true,
-      mode    => '0600',
-      content => hash2ini($keyfile_contents,$keyfile_settings);
+      content => $keyfile_contents;
   }
 
   if $ensure == present {
-    networkmanager::activate_connection($id, $state)
+    networkmanager::activate_connection($uuid, $id, $state)
   }
 
   include networkmanager::reload
