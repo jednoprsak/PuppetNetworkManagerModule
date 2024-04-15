@@ -1,9 +1,6 @@
-# @summary A short summary of the purpose of this class
-#
-# A description of what this class does
-#
-# This class applies NetworkManager service resource.
-#
+# This class manages NetworkManager services
+# Not to be used by user
+
 class networkmanager::service (
   Boolean $wait_online = $networkmanager::wait_online,
 ){

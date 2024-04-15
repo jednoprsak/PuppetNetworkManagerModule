@@ -2,11 +2,15 @@
 class networkmanager::os (){
   $os_family = downcase($facts['os']['family'])
   case $os_family {
-    'archlinux':{
+    'archlinux': {
       $package_name = 'networkmanager'
       $extra_packages = []
     }
-    'redhat':{
+    'debian': {
+      $package_name = 'network-manager'
+      $extra_packages = []
+    }
+    'redhat': {
       $package_name = 'NetworkManager'
       $extra_packages = []
     }
@@ -15,7 +19,7 @@ class networkmanager::os (){
       $extra_packages = []
     }
     default: {
-      fail('OS family unknown')
+      fail('OS family id notz defined for the networkmanager module')
     }
   }
 }

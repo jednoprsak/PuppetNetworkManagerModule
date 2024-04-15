@@ -22,7 +22,9 @@ Brain and mood.
 
 ### Setup Requirements **OPTIONAL**
 
-You need a few additional libraries like hash2stuff.
+You need a few additional libraries:
+* hash2stuff
+* sdtlib
 
 ### Beginning with networkmanager
 
@@ -32,59 +34,64 @@ our module will help you create keyfiles and push them inside that oven of hell.
 ## Usage
 ```puppet
 
-class { 'networkmanager':
-  erase_unmanaged_keyfiles => true,
-  no_auto_default          => true;
+class {
+  'networkmanager':
+    erase_unmanaged_keyfiles => true,
+    no_auto_default          => true;
 }
 
-networkmanager::ifc::connection { 'z1':
-  ensure         => present,
-  mac_address    => '52:54:00:4d:2a:56',
-  ipv4_method    => 'manual',
-  ipv4_address   => '192.168.1.12/24,192.168.1.1',
-  ipv4_dns       => '8.8.8.8;8.8.4.4;',
-  ipv6_method    => 'manual',
-  ipv6_dhcp_duid => '00:22:66::52:54:10:44:2a:56'
-  ipv6_address   => 'IPV6ADDRESS/PREFIX',
-  ipv6_dns       => 'IPV6DNS1;IPV6DNS2;'
-  ipv6_gateway   => 'IPV6GATEWAY'
+networkmanager::ifc::connection {
+  'z1':
+    ensure         => present,
+    mac_address    => '52:54:00:4d:2a:56',
+    ipv4_method    => 'manual',
+    ipv4_address   => '192.168.1.12/24,192.168.1.1',
+    ipv4_dns       => '8.8.8.8;8.8.4.4;',
+    ipv6_method    => 'manual',
+    ipv6_dhcp_duid => '00:22:66::52:54:10:44:2a:56'
+    ipv6_address   => 'IPV6ADDRESS/PREFIX',
+    ipv6_dns       => 'IPV6DNS1;IPV6DNS2;'
+    ipv6_gateway   => 'IPV6GATEWAY';
 }
 
-networkmanager::ifc::bridge { 'bridge1':
-  ensure => present,
-  type => 'bridge',
-  ipv6_method => 'disabled',
+networkmanager::ifc::bridge {
+  'bridge1':
+    ensure      => present,
+    ipv6_method => 'ignore';
 }
 
-networkmanager::ifc::bridge::slave { 'bridge1-slave':
-  ensure => present,
-  mac_address  => 'MM:AA:CC:MM:AA:CC', #here insert MAC address string.
-  master     => 'bridge1',
-  slave_type => 'bridge'
+networkmanager::ifc::bridge::slave {
+  'bridge1-slave':
+    ensure      => present,
+    mac_address => 'MM:AA:CC:MM:AA:CC', #here insert MAC address string.
+    master      => 'bridge1';
 }
 
-networkmanager::ifc::bond { 'bondmaster2':
-  ensure => present,
-  ipv4_method => 'auto',
-  ipv6_method => 'ignore',
-  additional_config => {
-    bond => {
-      mode => 'balance-xor',
-      miimon => '100',
-    }
-  };
+networkmanager::ifc::bond {
+  'bondmaster2':
+    ensure            => present,
+    ipv4_method       => 'auto',
+    ipv6_method       => 'ignore',
+    bond_mode         => 'balance-xor'
+    additional_config => {
+      bond => {
+        miimon => '100',
+      }
+    };
 }
 
-networkmanager::ifc::bond::slave { 'bondslaveens8':
-  ensure => present,
-  mac_address => 'MAC_ADDRESS',
-  master  => 'bondmaster2',
+networkmanager::ifc::bond::slave {
+  'bondslaveens8':
+    ensure      => present,
+    mac_address => 'MAC_ADDRESS',
+    master      => 'bondmaster2';
 }
 
-networkmanager::ifc::bond::slave { 'bondslaveens9':
-  ensure => present,
-  mac_address => 'MAC_ADDRESS',
-  master  => 'bondmaster2',
+networkmanager::ifc::bond::slave {
+  'bondslaveens9':
+    ensure      => present,
+    mac_address => 'MAC_ADDRESS',
+    master      => 'bondmaster2';
 }
 ```
 

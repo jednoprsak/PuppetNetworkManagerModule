@@ -1,9 +1,6 @@
-# @summary A short summary of the purpose of this class
-#
-# A description of what this class does
-#
-# @example
-#   include networkmanager::install
+# This class handles the installation of the networkamanger packages
+# Not to be used by user
+
 class networkmanager::install (
   Boolean          $install_package = $networkmanager::install_package,
   String           $package_name = $networkmanager::os::package_name,
@@ -31,8 +28,3 @@ class networkmanager::install (
     }
   }
 }
-
-# === Parameters:
-#
-#   $install_package - optional - true|false
-#   $version         - optional - version string

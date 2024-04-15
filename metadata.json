@@ -1,9 +1,9 @@
 {
   "name": "jednoprsak-networkmanager",
-  "version": "0.1.1",
+  "version": "1.0.0-rc1",
   "author": "Lukáš Míča",
   "summary": "Puppet module which installs, configures, and controls NetworkManager",
-  "license": "proprietary",
+  "license": "MIT",
   "source": "https://github.com/jednoprsak/PuppetNetworkManagerModule",
   "dependencies": [
     {

@@ -1,7 +1,10 @@
+# Ensures that the 'ignore' is returned when the 'disable' keyword is used on the networkamanger version < 1.20
+# Parametres:
+#   $ipv6_method = IPv6 IP method of the interface
+
 function networkmanager::ipv6_disable_version(
-  String $ipv6_method
-) >> String
-{
+  Enum['auto', 'dhcp', 'manual', 'ignore', 'link-local', 'disabled'] $ipv6_method,
+) >> String {
   if (
     $ipv6_method == 'disabled'
       and
