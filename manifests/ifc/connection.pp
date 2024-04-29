@@ -82,7 +82,7 @@ define networkmanager::ifc::connection(
       id   => $id,
       uuid => $uuid,
       type => $type,
-    },
+    } + $interface_name_config,
   }
 
   if $mac_address {
@@ -160,7 +160,6 @@ define networkmanager::ifc::connection(
 
 
   $keyfile_contents = deep_merge(
-      $interface_name_config,
       $master_config,
       $connection_config,
       $mac_config,
