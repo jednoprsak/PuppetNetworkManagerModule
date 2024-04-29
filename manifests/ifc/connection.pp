@@ -82,7 +82,7 @@ define networkmanager::ifc::connection(
       id   => $id,
       uuid => $uuid,
       type => $type,
-    } + $interface_name_config,
+    },
   }
 
   if $mac_address {
@@ -99,10 +99,7 @@ define networkmanager::ifc::connection(
 
   $ipv4_config = { ipv4 => { method => $ipv4_method } }
 
-  $ipv4_may_fail_config = $ipv4_method ? {
-    'disabled' => {},
-    default    => { ipv4 => { may-fail => $ipv4_may_fail } },
-  }
+  $ipv4_may_fail_config = { ipv4 => { may-fail => $ipv4_may_fail } }
 
   $ipv4_gw_config = $ipv4_gateway ? {
     undef   => {},
@@ -119,24 +116,15 @@ define networkmanager::ifc::connection(
     default => { ipv4 => { dns  => $ipv4_dns } },
   }
 
-  if $ipv6_method_w in ['ignore', 'disabled'] {
-    $ipv6_config = {
-      ipv6 => {
-        method        => $ipv6_method_w,
-      }
+  $ipv6_config = {
+    ipv6 => {
+      method        => $ipv6_method_w,
+      addr-gen-mode => $ipv6_addr_gen_mode,
+      ip6-privacy   => $ipv6_privacy,
     }
-    $ipv6_may_fail_config = {}
   }
-  else {
-    $ipv6_config = {
-      ipv6 => {
-        method        => $ipv6_method_w,
-        addr-gen-mode => $ipv6_addr_gen_mode,
-        ip6-privacy   => $ipv6_privacy,
-      }
-    }
-    $ipv6_may_fail_config = { ipv6 => { may-fail => $ipv6_may_fail } }
-  }
+
+  $ipv6_may_fail_config = { ipv6 => { may-fail => $ipv6_may_fail } }
 
   $ipv6_gw_config = $ipv6_gateway ? {
     undef   => {},
@@ -172,6 +160,7 @@ define networkmanager::ifc::connection(
 
 
   $keyfile_contents = deep_merge(
+      $interface_name_config,
       $master_config,
       $connection_config,
       $mac_config,
