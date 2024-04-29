@@ -64,14 +64,14 @@ define networkmanager::ifc::connection(
   $ipv6_method_w = networkmanager::ipv6_disable_version($ipv6_method)
 
   if $interface_name {
-    $interface_name_config = { interface-name => $interface_name }
+    $interface_name_config = { connection => { interface-name => $interface_name } }
   }
   else {
     $interface_name_config = {}
   }
 
   if $master {
-    $master_config = { master => networkmanager::connection_uuid($master) }
+    $master_config = { connection => { master => networkmanager::connection_uuid($master) } }
   }
   else {
     $master_config = {}
