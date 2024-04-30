@@ -4,20 +4,22 @@
 #   $ipv6_address = semicolon separated list of the ipv6 addresses to assign to the interface in format aa::bb:cc/64
 #   $ipv6_gateway = the ipv6 gateway for the connection
 #   $ipv6_dns = semicolon seperated list of the dns servers for the interface
-#   $ipv6_dhcp_duid = IPv6 DHCP DUID 'auto' value generates it with module from mac of the interface
 #   $ipv6_addr_gen_mode = IPv6 method for generating of automatic interface address
 #   $ipv6_privacy = should be the generated automatic address more private
 #   $ipv6_may_fail = is it ok that the ipv6 config fails?
+#   $ipv6_dhcp_duid = IPv6 DHCP DUID 'auto' value generates it with module from mac of the interface
+#   $mac_address = the mac of the interface for the connection
 
 function networkmanager::prepare_ipv6_config (
   Enum['auto','dhcp','manual','ignore','link-local','disabled'] $ipv6_method,
   Optional[Stdlib::IP::Address::V6::CIDR]                       $ipv6_address,
   Optional[Stdlib::IP::Address::V6::Nosubnet]                   $ipv6_gateway,
   Optional[Networkmanager::DNS_IPV6]                            $ipv6_dns,
-  Optional[String]                                              $ipv6_dhcp_duid,
   Integer[0, 3]                                                 $ipv6_addr_gen_mode,
   Integer[-1, 2]                                                $ipv6_privacy,
   Boolean                                                       $ipv6_may_fail,
+  Optional[String]                                              $ipv6_dhcp_duid,
+  Optional[Stdlib::MAC]                                         $mac_address,
 ) >> Hash {
 
   $ipv6_method_w = networkmanager::ipv6_disable_version($ipv6_method)

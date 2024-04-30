@@ -93,10 +93,11 @@ define networkmanager::ifc::bridge (
       $ipv6_address,
       $ipv6_gateway,
       $ipv6_dns,
-      $ipv6_dhcp_duid,
       $ipv6_addr_gen_mode,
       $ipv6_privacy,
-      $ipv6_may_fail
+      $ipv6_may_fail,
+      $ipv6_dhcp_duid,
+      $mac_address
     )
 
   $keyfile_contents = deep_merge(
