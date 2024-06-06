@@ -20,7 +20,18 @@ function networkmanager::get_ipv6_duid(
         ]
     ] $duid,
   Optional[Stdlib::MAC] $mac_address,
-) >> String {
+) >> Variant[
+  Pattern[/\h{2}(:\h{2})+$/],
+  Undef,
+  Enum[
+    'lease',
+    'll',
+    'llt',
+    'stable-ll',
+    'stable-llt',
+    'stable-uuid'
+  ]
+]{
   if 'auto' == $duid {
     if $mac_address {
       networkmanager::connection_duid($mac_address)
