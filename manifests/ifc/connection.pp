@@ -92,10 +92,7 @@ define networkmanager::ifc::connection(
     $mac_config = {}
   }
 
-  $ipv6_dhcp_duid_w = $ipv6_dhcp_duid ? {
-    'auto'  => networkmanager::connection_duid($mac_address),
-    default => $ipv6_dhcp_duid,
-  }
+  $ipv6_dhcp_duid_w = networkmanager::get_ipv6_duid($ipv6_dhcp_duid, $mac_address)
 
   $ipv4_config = { ipv4 => { method => $ipv4_method } }
 
