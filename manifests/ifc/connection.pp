@@ -144,7 +144,7 @@ define networkmanager::ifc::connection(
     and 'up' == $state {
       fail("IPv6 method for connection '${id}' is '${ipv6_method_w}' but no \$ipv6_dhcp_duid was supplied.")
   }
-  elsif $ipv6_method_w in ['auto', 'dhcp'] and 'up' == $state {
+  elsif $ipv6_method_w in ['auto', 'dhcp'] and 'up' == $state and $ipv6_dhcp_duid_w != undef {
     $ipv6_duid_config = {
       ipv6 => {
         dhcp-duid => $ipv6_dhcp_duid_w,
