@@ -102,6 +102,5 @@ You can override this limit by setting the $networkmanager::max_length_of_connec
 
 ## Contact
 
-mica@fzu.cz
 jednoprsak@gmail.com
 
