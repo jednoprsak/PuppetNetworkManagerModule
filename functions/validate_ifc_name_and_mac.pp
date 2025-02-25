@@ -3,7 +3,7 @@
 #   $caller = the puppet name of the resource which called this function (for sensible error line)
 #   $caller_title = the instance of the resouce which alled the fumction (for sensible error line)
 #   $interface_mac = the connection interface mac address
-#   $ine4terface_name = the connection interface name
+#   $interface_name = the connection interface name
 
 function networkmanager::validate_ifc_name_and_mac (
   String                        $caller,
