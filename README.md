@@ -3,11 +3,18 @@
 
 ## Table of Contents
 
+1. [Disclaimer](#disclaimer)
 1. [Description](#description)
 1. [Setup - The basics of getting started with networkmanager](#setup)
     * [What networkmanager module affects](#what-networkmanager-affects)
     * [Setup requirements](#setup-requirements)
     * [Beginning with networkmanager](#beginning-with-networkmanager)
+
+
+## Disclaimer
+
+This project is FOSS project, the work on it is done either in free time or as a part of a daily job which is not focused on devoloping this code. The ssies wil be fixaed as soon as time allows, it can take more time than you would expect. The code is still actively used at 300+ machines so any problesm found are fixed and will be eventualy sahred here. If you have a problem please create na issue, or pull request if you can.
+Writing e-mails to the authors wont help.
 
 ## Description
 
@@ -102,5 +109,5 @@ You can override this limit by setting the $networkmanager::max_length_of_connec
 
 ## Contact
 
-jednoprsak@gmail.com
+https://github.com/jednoprsak/PuppetNetworkManagerModule/issues
 
