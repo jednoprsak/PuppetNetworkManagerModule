@@ -5,13 +5,12 @@
 function networkmanager::ipv6_disable_version(
   Enum['auto', 'dhcp', 'manual', 'ignore', 'link-local', 'disabled'] $ipv6_method,
 ) >> String {
-  if (
-    $ipv6_method == 'disabled'
-      and
-    Integer($facts['networkmanager']['version']['major']) == 1
-      and
-    Integer($facts['networkmanager']['version']['minor']) < 20
-  ) {
+  # the fact is not there before NetworkManager is installed, then the version is not known to be old
+  $major = $facts.dig('networkmanager', 'version', 'major')
+  $minor = $facts.dig('networkmanager', 'version', 'minor')
+  $legacy = $major =~ NotUndef and $minor =~ NotUndef and 1 == Integer($major) and 20 > Integer($minor)
+
+  if 'disabled' == $ipv6_method and $legacy {
     include networkmanager::notify_ipv6_disabled
     $return = 'ignore'
   }

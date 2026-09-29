@@ -1,5 +1,8 @@
 # This class manages NetworkManager services
 # Not to be used by user
+#
+# @param wait_online
+#   Taken from `$networkmanager::wait_online`
 
 class networkmanager::service (
   Boolean $wait_online = $networkmanager::wait_online,

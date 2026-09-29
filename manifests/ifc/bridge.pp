@@ -1,31 +1,53 @@
 # This defined resource creates master bridge keyfile.
-# Parameters:
-#   $ensure = state of the interface config DEFAULT: present
-#   $state = state of the interface (UP/DOWN) not relevant when $ensure == 'absent' DEFAULT: 'up'
-#   $id = the name of the connection DEFAULT: $title of the resource
-#   $interface_name = name of the connection interface REQUIRED DEFAULT: $title of the resource
-#   $mac_address = the mac of the interface for the connection
-#   $master = $id or UUID of the connection master if applicable
-#   $bridge_stp = bridge the spanning tree protocol
-#   $bridge_forward_dealy = delay of forwarding in seconds
-#   $ipv4_method = what method to use to get an IPv4 address DEFAULT: 'auto'
-#   $ipv4_address = the IPv4 address with the prefix length and an optional gateway (192.0.2.12/24 or 192.0.2.12/24,192.0.2.1), more addresses as an array or as a string separated by a semicolon (192.0.2.12/24;198.51.100.12/24)
-#   $ipv4_gateway = the IPv4 gateway for the connection
-#   $ipv4_dns = up to 5 DNS servers for the IPv4: an array of addresses or a string with the addresses separated by a semicolon (192.0.2.53;192.0.2.54;)
-#   $ipv4_may_fail = is it OK that the IPv4 config fails? DEFAULT: true
-#   $ipv6_method = what method to use to get an ipv6 address DEFAULT: 'auto'
-#   $ipv6_address = the IPv6 address with the prefix length (2001:db8::12/64), more addresses as an array or as a string separated by a semicolon (2001:db8::12/64;2001:db8:1::12/64)
-#   $ipv6_gateway = the ipv6 gateway for the connection
-#   $ipv6_dns = up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (2001:db8::53;2001:db8::54;)
-#   $ipv6_dhcp_duid = IPv6 DHCP DUID, 'auto' builds it from the $mac_address, 'unset' writes nothing (NetworkManager default), a NetworkManager keyword or a literal DUID is used as it is DEFAULT: $networkmanager::ipv6_dhcp_duid_default
-#   $ipv6_addr_gen_mode = IPv6 method for generating of automatic interface address
-#   $ipv6_privacy = should be the generated automatic address more private
-#   $ipv6_may_fail = is it OK that the ipv6 config fails? DEFAULT: true
-#   $additional_config = Other not covered configuration
-#     In the case when you want to specify special not listed parameters you can add them through
-#     $additional_config hash and it will be merged with other parameters.
-#     The additional_config has the HIGHEST priority when merged!
-#     ie: it will override the defined values of the connection in case of the conflict
+#
+# @param ensure
+#   state of the interface config DEFAULT: present
+# @param state
+#   state of the interface (UP/DOWN) not relevant when $ensure == 'absent' DEFAULT: 'up'
+# @param id
+#   the name of the connection DEFAULT: $title of the resource
+# @param interface_name
+#   name of the connection interface DEFAULT: $title of the resource
+# @param mac_address
+#   the mac of the interface for the connection
+# @param master
+#   $id or UUID of the connection master if applicable
+# @param bridge_stp
+#   bridge the spanning tree protocol
+# @param bridge_forward_delay
+#   delay of forwarding in seconds
+# @param ipv4_method
+#   what method to use to get an IPv4 address DEFAULT: 'auto'
+# @param ipv4_address
+#   the IPv4 address with the prefix length and an optional gateway (192.0.2.12/24 or 192.0.2.12/24,192.0.2.1), more addresses as an array or as a string separated by a semicolon (192.0.2.12/24;198.51.100.12/24)
+# @param ipv4_gateway
+#   the IPv4 gateway for the connection
+# @param ipv4_dns
+#   up to 5 DNS servers for the IPv4: an array of addresses or a string with the addresses separated by a semicolon (192.0.2.53;192.0.2.54;)
+# @param ipv4_may_fail
+#   is it OK that the IPv4 config fails? DEFAULT: true
+# @param ipv6_method
+#   what method to use to get an ipv6 address DEFAULT: 'auto'
+# @param ipv6_address
+#   the IPv6 address with the prefix length (2001:db8::12/64), more addresses as an array or as a string separated by a semicolon (2001:db8::12/64;2001:db8:1::12/64)
+# @param ipv6_gateway
+#   the ipv6 gateway for the connection
+# @param ipv6_dns
+#   up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (2001:db8::53;2001:db8::54;)
+# @param ipv6_dhcp_duid
+#   IPv6 DHCP DUID, 'auto' builds it from the $mac_address, 'unset' writes nothing (NetworkManager default), a NetworkManager keyword or a literal DUID is used as it is DEFAULT: $networkmanager::ipv6_dhcp_duid_default
+# @param ipv6_addr_gen_mode
+#   IPv6 method for generating of automatic interface address
+# @param ipv6_privacy
+#   should be the generated automatic address more private
+# @param ipv6_may_fail
+#   is it OK that the ipv6 config fails? DEFAULT: true
+# @param additional_config
+#   Other not covered configuration
+#   In the case when you want to specify special not listed parameters you can add them through
+#   $additional_config hash and it will be merged with other parameters.
+#   The additional_config has the HIGHEST priority when merged!
+#   ie: it will override the defined values of the connection in case of the conflict
 
 define networkmanager::ifc::bridge (
   Enum['absent', 'present']                                     $ensure = present,
@@ -40,7 +62,7 @@ define networkmanager::ifc::bridge (
   Optional[Networkmanager::IPV4_ADDRESSES]                           $ipv4_address = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet]                   $ipv4_gateway = undef,
   Optional[Networkmanager::DNS_IPV4]                            $ipv4_dns = undef,
-  Optional[Boolean]                                             $ipv4_may_fail = true,
+  Boolean                                                       $ipv4_may_fail = true,
   Enum['auto','dhcp','manual','ignore','link-local','disabled'] $ipv6_method = 'auto',
   Optional[Networkmanager::IPV6_ADDRESSES]                       $ipv6_address = undef,
   Optional[Stdlib::IP::Address::V6::Nosubnet]                   $ipv6_gateway = undef,

@@ -3,6 +3,20 @@
 # inside config file according to no_auto_default parameter defined at the entrance
 # of networkmanager class.
 # It is not recommended to use it without main networkmanager class.
+#
+# @param erase_unmanaged_keyfiles
+#   Taken from `$networkmanager::erase_unmanaged_keyfiles`
+# @param no_auto_default
+#   Taken from `$networkmanager::no_auto_default`
+# @param unmanaged_devices
+#   Taken from `$networkmanager::unmanaged_devices`
+# @param plugins
+#   Taken from `$networkmanager::plugins`
+# @param use_internal_resolv_conf
+#   Taken from `$networkmanager::use_internal_resolv_conf`
+# @param additional_config
+#   Settings merged over the NetworkManager.conf built by the module, they win in case of a conflict.
+#   Taken from `$networkmanager::additional_config`
 
 class networkmanager::config (
   Boolean                               $erase_unmanaged_keyfiles = $networkmanager::erase_unmanaged_keyfiles,

@@ -26,7 +26,7 @@ function networkmanager::resolve_ipv6_duid(
       'unset': { undef }
       'auto':  {
         if $mac_address {
-          networkmanager::get_ipv6_duid('auto', $mac_address)
+          networkmanager::connection_duid($mac_address)
         }
         else {
           fail("The IPv6 DHCP DUID of the connection '${id}' is 'auto' but no mac_address was supplied, set the mac_address, an ipv6_dhcp_duid ('unset' to use the NetworkManager default) or networkmanager::ipv6_dhcp_duid_default")

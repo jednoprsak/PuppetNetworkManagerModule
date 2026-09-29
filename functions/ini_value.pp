@@ -12,7 +12,7 @@ function networkmanager::ini_value(
     Undef:   { '' }
     Array:   {
       $items = $value.map |$item| {
-        regsubst(networkmanager::ini_value("${item}"), ';', '\\\;', 'G')
+        regsubst(networkmanager::ini_value(String($item)), ';', '\\\;', 'G')
       }
       empty($items) ? {
         true    => '',
@@ -20,10 +20,10 @@ function networkmanager::ini_value(
       }
     }
     default: {
-      $backslash = regsubst("${value}", '\\\\', '\\\\\\\\', 'G')
-      $newline   = regsubst($backslash, "\n", '\\\\n', 'G')
-      $tab       = regsubst($newline, "\t", '\\\\t', 'G')
-      $return    = regsubst($tab, "\r", '\\\\r', 'G')
+      $backslash = regsubst(String($value), '\\\\', '\\\\\\\\', 'G')
+      $newline   = regsubst($backslash, /\n/, '\\\\n', 'G')
+      $tab       = regsubst($newline, /\t/, '\\\\t', 'G')
+      $return    = regsubst($tab, /\r/, '\\\\r', 'G')
       $leading   = regsubst($return, '\A ', '\\\\s')
       regsubst($leading, ' \z', '\\\\s')
     }

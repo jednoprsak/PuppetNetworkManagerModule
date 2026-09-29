@@ -1,24 +1,34 @@
 # This defined resource creates the vlan connection keyfile.
-# Parameters:
-#   $vlan_id = id of the desired vlan REQUIRED
-#   $vlan_parent = $id of the parent connection managed by this module or the plain UUID (without any prefix like 'UUID=') of the parent connection REQUIRED
-#     The parent interface name is not supported, if the parent is not managed by this module find out its UUID yourself and supply it.
-#   $ensure = state of the interface config DEFAULT: present
-#   $state = state of the interface (UP/DOWN) not relevant when $ensure == 'absent' DEFAULT: 'up'
-#   $id = the name of the connection DEFAULT: $title of the resource
-#   $interface_name = name of the connection interface REQUIRED DEFAULT: $title of the resource
-#   $master = $id or UUID of the connection master if applicable
-#   $slave_type = type which this port should assume if set as slave (IGNORED if $master == undef)
-#   $vlan_flags = flags for the 802.1Q vlan protocol DEFAULT: 1
-#   $additional_config = Other not covered configuration
-#     In the case when you want to specify special not listed parameters you can add them through
-#     $additional_config hash and it will be merged with other parameters.
-#     The additional_config has the HIGHEST priority when merged!
-#     ie: it will override the defined values of the connection in case of the conflict
+#
+# @param vlan_id
+#   id of the desired vlan REQUIRED
+# @param vlan_parent
+#   $id of the parent connection managed by this module or the plain UUID (without any prefix like 'UUID=') of the parent connection REQUIRED
+#   The parent interface name is not supported, if the parent is not managed by this module find out its UUID yourself and supply it.
+# @param ensure
+#   state of the interface config DEFAULT: present
+# @param state
+#   state of the interface (UP/DOWN) not relevant when $ensure == 'absent' DEFAULT: 'up'
+# @param id
+#   the name of the connection DEFAULT: $title of the resource
+# @param interface_name
+#   name of the connection interface DEFAULT: $title of the resource
+# @param master
+#   $id or UUID of the connection master if applicable
+# @param slave_type
+#   type which this port should assume if set as slave (IGNORED if $master == undef)
+# @param vlan_flags
+#   flags for the 802.1Q vlan protocol DEFAULT: 1
+# @param additional_config
+#   Other not covered configuration
+#   In the case when you want to specify special not listed parameters you can add them through
+#   $additional_config hash and it will be merged with other parameters.
+#   The additional_config has the HIGHEST priority when merged!
+#   ie: it will override the defined values of the connection in case of the conflict
 
 define networkmanager::ifc::vlan (
   Integer[1, 4094]          $vlan_id,
-  Optional[String]          $vlan_parent,
+  String                    $vlan_parent,
   Enum['absent', 'present'] $ensure = present,
   Enum['up', 'down']        $state = 'up',
   String                    $id = $title,
