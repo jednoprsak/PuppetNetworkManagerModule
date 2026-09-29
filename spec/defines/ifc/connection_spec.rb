@@ -66,3 +66,19 @@ describe 'networkmanager::ifc::connection' do
     end
   end
 end
+
+describe 'networkmanager::ifc::connection' do
+  let(:title) { 'eth0conn' }
+  let(:facts) { nm_test_facts('AlmaLinux', '9') }
+  let(:file) { '/etc/NetworkManager/system-connections/eth0conn.nmconnection' }
+
+  context 'with the IPv4 disabled and the IPv6 ignored' do
+    let(:params) do
+      { interface_name: 'eth0', ipv4_method: 'disabled', ipv4_address: '10.0.0.5/24', ipv4_dns: '1.1.1.1;',
+        ipv6_method: 'ignore', ipv6_address: '2001:db8::5/64' }
+    end
+
+    it { is_expected.to contain_file(file).with_content(%r{\[ipv4\]\nmethod=disabled\n\n\[ipv6\]\nmethod=ignore\n}) }
+    it { is_expected.not_to contain_file(file).with_content(%r{^(address|dns|may-fail|addr-gen-mode|ip6-privacy)}) }
+  end
+end

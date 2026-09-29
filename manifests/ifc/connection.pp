@@ -85,24 +85,18 @@ define networkmanager::ifc::connection (
         'type'           => $type,
       },
       'ethernet'   => { 'mac-address' => $mac_address },
-      'ipv4'       => {
-        'method'   => $ipv4_method,
-        'may-fail' => $ipv4_may_fail,
-        'gateway'  => $ipv4_gateway,
-      } + networkmanager::address_settings($ipv4_address) + {
-        'dns'      => networkmanager::dns_list($ipv4_dns),
-      },
-      'ipv6'       => {
-        'method'        => $ipv6_method_w,
-        'addr-gen-mode' => $ipv6_addr_gen_mode,
-        'ip6-privacy'   => $ipv6_privacy,
-        'may-fail'      => $ipv6_may_fail,
-        'gateway'       => $ipv6_gateway,
-      } + networkmanager::address_settings($ipv6_address) + {
-        'dns'           => networkmanager::dns_list($ipv6_dns),
-        'dhcp-duid'     => $ipv6_duid,
-      },
     }),
+    networkmanager::prepare_ipv4_config($ipv4_method, $ipv4_address, $ipv4_gateway, $ipv4_dns, $ipv4_may_fail),
+    networkmanager::prepare_ipv6_config(
+      $ipv6_method_w,
+      $ipv6_address,
+      $ipv6_gateway,
+      $ipv6_dns,
+      $ipv6_addr_gen_mode,
+      $ipv6_privacy,
+      $ipv6_may_fail,
+      $ipv6_duid
+    ),
     $additional_config
   )
 

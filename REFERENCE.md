@@ -314,6 +314,37 @@ Parameters:
 
 * `ipv6_method` (`Enum['auto', 'dhcp', 'manual', 'ignore', 'link-local', 'disabled']`) — IPv6 IP method of the interface
 
+### `networkmanager::prepare_ipv4_config`
+
+Prepares the "ipv4" section of the keyfile. Only the method is written when the IPv4 is disabled, the other settings would have no effect. Based on the idea of the pull request 24 by kbucheli.
+
+Returns: `Hash`
+
+Parameters:
+
+* `ipv4_method` (`Enum['auto', 'dhcp', 'manual', 'disabled', 'link-local']`) — what method to use to get an IPv4 address
+* `ipv4_address` (`Optional[Networkmanager::IPV4_ADDRESSES]`) — the IPv4 address(es) to assign to the interface, see networkmanager::address_settings
+* `ipv4_gateway` (`Optional[Stdlib::IP::Address::V4::Nosubnet]`) — the IPv4 gateway for the connection
+* `ipv4_dns` (`Optional[Networkmanager::DNS_IPV4]`) — the dns servers for the interface (array or semicolon separated string)
+* `ipv4_may_fail` (`Boolean`) — is it OK that the IPv4 config fails?
+
+### `networkmanager::prepare_ipv6_config`
+
+Prepares the "ipv6" section of the keyfile. Only the method is written when the IPv6 is ignored or disabled, the other settings would have no effect. Based on the idea of the pull request 24 by kbucheli.
+
+Returns: `Hash`
+
+Parameters:
+
+* `ipv6_method` (`Enum['auto', 'dhcp', 'manual', 'ignore', 'link-local', 'disabled']`) — what method to use to get an IPv6 address (already adjusted by networkmanager::ipv6_disable_version)
+* `ipv6_address` (`Optional[Networkmanager::IPV6_ADDRESSES]`) — the IPv6 address(es) to assign to the interface, see networkmanager::address_settings
+* `ipv6_gateway` (`Optional[Stdlib::IP::Address::V6::Nosubnet]`) — the IPv6 gateway for the connection
+* `ipv6_dns` (`Optional[Networkmanager::DNS_IPV6]`) — the dns servers for the interface (array or semicolon separated string)
+* `ipv6_addr_gen_mode` (`Integer[0, 3]`) — IPv6 method for generating of automatic interface address
+* `ipv6_privacy` (`Integer[-1, 2]`) — should be the generated automatic address more private
+* `ipv6_may_fail` (`Boolean`) — is it OK that the IPv6 config fails?
+* `ipv6_dhcp_duid` (`Optional[String]`) — the IPv6 DHCP DUID, undef when it should not be written
+
 ### `networkmanager::reload_connection`
 
 Reloads the connection through the dbus
