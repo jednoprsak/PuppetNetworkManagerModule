@@ -2,7 +2,7 @@
 # sets up whether to erase unmanaged keyfiles, and adds no-auto-default option
 # inside config file according to no_auto_default parameter defined at the entrance
 # of networkmanager class.
-# It is not recomanded to use it without main networkmanager class.
+# It is not recommended to use it without main networkmanager class.
 
 class networkmanager::config (
   Boolean                               $erase_unmanaged_keyfiles = $networkmanager::erase_unmanaged_keyfiles,
@@ -11,17 +11,17 @@ class networkmanager::config (
   Array[String]                         $plugins = $networkmanager::plugins,
   Variant[Boolean, Enum['stub'], Undef] $use_internal_resolv_conf = $networkmanager::use_internal_resolv_conf,
   Hash                                  $additional_config = $networkmanager::additional_config,
-){
+) {
   $main_conf_file = '/etc/NetworkManager/NetworkManager.conf'
   if $unmanaged_devices != [] {
     $unmanaged_devices_c = join($unmanaged_devices.map |$dev| {
-        if $dev =~ Stdlib::MAC {
-          "mac:${dev}"
-        }
-        else {
-          "interface-name:${dev}"
-        }
-      }, ';')
+      if $dev =~ Stdlib::MAC {
+        "mac:${dev}"
+      }
+      else {
+        "interface-name:${dev}"
+      }
+    }, ';')
     $unmanaged = { 'keyfile' => { 'unmanaged-devices' => $unmanaged_devices_c } }
   }
   else {
@@ -39,12 +39,6 @@ class networkmanager::config (
   }
   $default_config = { 'main' => { 'plugins' => join($plugins, ',') } }
 
-  $main_file_settings = {
-    'path'              => $main_conf_file,
-    'quote_char'        => '',
-    'key_val_separator' => '=',
-    'require'           => File[$main_conf_file],
-  }
   $main_conf_content = deep_merge($default_config, $noauto, $unmanaged, $additional_config)
 
   if $use_internal_resolv_conf != undef {
@@ -63,7 +57,7 @@ class networkmanager::config (
       }
     }
     if $link {
-      file{
+      file {
         '/etc/resolv.conf':
           ensure => link,
           force  => true,
@@ -89,7 +83,7 @@ class networkmanager::config (
       group   => 'root',
       mode    => '0600',
       notify  => Class['networkmanager::service'],
-      content => hash2ini($main_conf_content, $main_file_settings);
+      content => epp('networkmanager/ini.epp', { 'content' => $main_conf_content });
     '/etc/NetworkManager/system-connections':
       ensure  => directory,
       owner   => 'root',

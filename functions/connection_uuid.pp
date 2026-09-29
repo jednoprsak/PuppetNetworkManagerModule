@@ -1,5 +1,5 @@
 # Returns stable connection uuid unless connection $id is uuid already.
-# Parametres:
+# Parameters:
 #   $id = connection id
 
 function networkmanager::connection_uuid(

@@ -1,10 +1,11 @@
+# Finds out the NetworkManager version and inserts it as a fact $facts['networkmanager']
 Facter.add(:networkmanager) do
   confine :kernel => 'Linux'
   version_s = [ 'major', 'minor', 'build' ]
   patch_s = [ 'patch', 'suffix' ]
   nm = Facter::Util::Resolution.which('NetworkManager')
   if nm.nil?
-    Facter.debug("NetwormManager binary not found")
+    Facter.debug("NetworkManager binary not found")
     next nil
   end
   output = Facter::Util::Resolution.exec("#{nm} --version")

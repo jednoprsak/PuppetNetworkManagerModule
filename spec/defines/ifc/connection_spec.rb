@@ -3,16 +3,41 @@
 require 'spec_helper'
 
 describe 'networkmanager::ifc::connection' do
-  let(:title) { 'namevar' }
+  let(:title) { 'eth0conn' }
   let(:params) do
-    {}
+    { interface_name: 'eth0', ipv6_method: 'ignore', ipv4_method: 'manual', ipv4_address: '10.0.0.5/24', ipv4_gateway: '10.0.0.1' }
   end
 
-  on_supported_os.each do |os, os_facts|
+  each_test_os do |os, os_facts|
     context "on #{os}" do
       let(:facts) { os_facts }
 
-      it { is_expected.to compile }
+      it { is_expected.to compile.with_all_deps }
+      it { is_expected.to contain_file('/etc/NetworkManager/system-connections/eth0conn.nmconnection').with_mode('0600') }
     end
   end
+end
+
+describe 'networkmanager::ifc::connection' do
+  let(:title) { 'eth0conn' }
+  let(:facts) { nm_test_facts('AlmaLinux', '9') }
+  let(:params) do
+    { interface_name: 'eth0', ipv6_method: 'manual', ipv6_address: '2001:db8::5/64',
+      ipv4_dns: ['8.8.8.8', '8.8.4.4'], ipv6_dns: ['2001:db8::53'] }
+  end
+
+  it { is_expected.to contain_file('/etc/NetworkManager/system-connections/eth0conn.nmconnection').with_content(%r{^dns=8\.8\.8\.8;8\.8\.4\.4;$}) }
+  it { is_expected.to contain_file('/etc/NetworkManager/system-connections/eth0conn.nmconnection').with_content(%r{^dns=2001:db8::53;$}) }
+end
+
+describe 'networkmanager::ifc::connection' do
+  let(:title) { 'eth0conn' }
+  let(:facts) { nm_test_facts('AlmaLinux', '9') }
+  let(:params) do
+    { interface_name: 'eth0', ipv6_method: 'ignore',
+      additional_config: { 'ipv4' => { 'dns-search' => ['example.com', 'example.org'] }, 'x' => { 'y' => 'a\\b' } } }
+  end
+
+  it { is_expected.to contain_file('/etc/NetworkManager/system-connections/eth0conn.nmconnection').with_content(%r{^dns-search=example\.com;example\.org;$}) }
+  it { is_expected.to contain_file('/etc/NetworkManager/system-connections/eth0conn.nmconnection').with_content(%r{^y=a\\\\b$}) }
 end

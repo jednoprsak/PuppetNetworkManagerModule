@@ -1,4 +1,4 @@
-# This class handles the installation of the networkamanger packages
+# This class handles the installation of the NetworkManager packages
 # Not to be used by user
 
 class networkmanager::install (

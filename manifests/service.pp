@@ -3,7 +3,7 @@
 
 class networkmanager::service (
   Boolean $wait_online = $networkmanager::wait_online,
-){
+) {
   if $wait_online {
     $wait_ensure = running
     $wait_enable = true

@@ -1,0 +1,59 @@
+---
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    name: Static checks
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - name: Install gems
+        run: bundle install --jobs 4
+      - name: Metadata lint
+        run: bundle exec metadata-json-lint metadata.json
+      - name: Puppet syntax
+        run: bundle exec rake syntax
+      - name: Puppet lint
+        run: bundle exec rake lint
+
+  spec:
+    name: Spec (${{ matrix.openvox && 'OpenVox' || 'Puppet' }} ${{ matrix.openvox || matrix.puppet }}, stdlib ${{ matrix.stdlib }}, Ruby ${{ matrix.ruby }})
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {puppet: '6', ruby: '2.7', stdlib: 'v6.6.0'}
+          - {puppet: '7', ruby: '2.7', stdlib: 'v9.7.0'}
+          - {puppet: '7', ruby: '3.2', stdlib: 'v9.7.0'}
+          - {puppet: '8', ruby: '3.3', stdlib: 'v9.7.0'}
+          - {puppet: '8', ruby: '3.3', stdlib: 'v10.1.0'}
+          - {openvox: '7', ruby: '2.7', stdlib: 'v9.7.0'}
+          - {openvox: '8', ruby: '3.3', stdlib: 'v10.1.0'}
+    env:
+      PUPPET_GEM_VERSION: ${{ matrix.puppet && format('~> {0}.0', matrix.puppet) || '' }}
+      OPENVOX_GEM_VERSION: ${{ matrix.openvox && format('~> {0}.0', matrix.openvox) || '' }}
+      STDLIB_REF: ${{ matrix.stdlib }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: Install gems
+        run: bundle install --jobs 4
+      - name: Fetch stdlib fixture
+        run: git clone --depth 1 --branch "${STDLIB_REF}" https://github.com/puppetlabs/puppetlabs-stdlib.git spec/fixtures/modules/stdlib
+      - name: Run spec tests
+        run: bundle exec rake spec

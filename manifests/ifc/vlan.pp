@@ -1,15 +1,15 @@
 # This defined resource creates the vlan connection keyfile.
-# Parametres:
+# Parameters:
 #   $vlan_id = id of the desired vlan REQUIRED
 #   $vlan_parent = $id or UUID of the parent for this interface REQUIRED
 #   $ensure = state of the interface config DEFAULT: present
 #   $state = state of the interface (UP/DOWN) not relevant when $ensure == 'absent' DEFAULT: 'up'
 #   $id = the name of the connection DEFAULT: $title of the resource
 #   $interface_name = name of the connection interface REQUIRED DEFAULT: $title of the resource
-#   $master = $id or UUID of the connection maste if applicable
+#   $master = $id or UUID of the connection master if applicable
 #   $slave_type = type which this port should assume if set as slave (IGNORED if $master == undef)
 #   $vlan_flags = flags for the 802.1Q vlan protocol DEFAULT: 1
-#   $addtional_config = Other not covered configuration
+#   $additional_config = Other not covered configuration
 #     In the case when you want to specify special not listed parameters you can add them through
 #     $additional_config hash and it will be merged with other parameters.
 #     The additional_config has the HIGHEST priority when merged!
@@ -36,31 +36,25 @@ define networkmanager::ifc::vlan (
 
   $uuid = networkmanager::connection_uuid($id)
 
-  $master_config = $master ? {
-    undef   => {},
-    default => {
-      connection => {
-        master => networkmanager::connection_uuid($master),
-        slave-type     => $slave_type,
-      }
-    },
-  }
+  $keyfile_contents = deep_merge(
+    networkmanager::compact_keyfile({
+      'connection' => {
+        'master'         => $master ? { undef => undef, default => networkmanager::connection_uuid($master) },
+        'slave-type'     => $master ? { undef => undef, default => $slave_type },
+        'id'             => $id,
+        'uuid'           => $uuid,
+        'type'           => 'vlan',
+        'interface-name' => $interface_name,
+      },
+      'vlan'       => {
+        'id'     => $vlan_id,
+        'flags'  => $vlan_flags,
+        'parent' => networkmanager::connection_uuid($vlan_parent),
+      },
+    }),
+    $additional_config
+  )
 
-  $connection_config = {
-    connection => {
-      id             => $id,
-      uuid           => $uuid,
-      type           => 'vlan',
-      interface-name => $interface_name,
-    },
-    vlan => {
-      id     => $vlan_id,
-      flags  => $vlan_flags,
-      parent => networkmanager::connection_uuid($vlan_parent),
-    },
-  }
-
-  $keyfile_contents = deep_merge($master_config, $connection_config, $additional_config)
   networkmanager::connection_keyfile_manage {
     $id:
       ensure  => $ensure,

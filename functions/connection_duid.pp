@@ -1,5 +1,5 @@
-# Retunrs IPv6 DHCP DUID
-# Parametres:
+# Returns IPv6 DHCP DUID
+# Parameters:
 #   $mac = MAC address of the interface
 # Additional variables:
 #   $networkmanager::duid_prefix = prefix for the dhcp duid (taken from the networkmanager class)

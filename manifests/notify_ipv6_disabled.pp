@@ -3,6 +3,6 @@
 
 class networkmanager::notify_ipv6_disabled {
   $text = '"disabled" option for parameter ipv6_method is not available in versions of network manager minor than 1.20, changing to "ignore"'
-  notify {$text:;}
+  notify { $text:; }
   warning($text)
 }

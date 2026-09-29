@@ -3,16 +3,17 @@
 require 'spec_helper'
 
 describe 'networkmanager::ifc::fallback' do
-  let(:title) { 'namevar' }
+  let(:title) { 'fallback0' }
   let(:params) do
-    {}
+    { config: { 'ipv4' => { 'method' => 'auto' } } }
   end
 
-  on_supported_os.each do |os, os_facts|
+  each_test_os do |os, os_facts|
     context "on #{os}" do
       let(:facts) { os_facts }
 
-      it { is_expected.to compile }
+      it { is_expected.to compile.with_all_deps }
+      it { is_expected.to contain_file('/etc/NetworkManager/system-connections/fallback0.nmconnection').with_mode('0600') }
     end
   end
 end

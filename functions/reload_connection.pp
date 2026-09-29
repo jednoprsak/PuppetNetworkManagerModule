@@ -1,7 +1,7 @@
 # Reloads the connection through the dbus
-# Parametres:
+# Parameters:
 #   $uuid = the connection uuid
-#   $state = the disered connection state
+#   $state = the desired connection state
 
 function networkmanager::reload_connection(
   Pattern[/^\h{8}-(\h{4}-){3}\h{12}$/] $uuid,

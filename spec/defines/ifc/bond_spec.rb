@@ -3,16 +3,17 @@
 require 'spec_helper'
 
 describe 'networkmanager::ifc::bond' do
-  let(:title) { 'namevar' }
+  let(:title) { 'bond0' }
   let(:params) do
-    {}
+    { ipv6_method: 'ignore' }
   end
 
-  on_supported_os.each do |os, os_facts|
+  each_test_os do |os, os_facts|
     context "on #{os}" do
       let(:facts) { os_facts }
 
-      it { is_expected.to compile }
+      it { is_expected.to compile.with_all_deps }
+      it { is_expected.to contain_file('/etc/NetworkManager/system-connections/bond0.nmconnection').with_mode('0600') }
     end
   end
 end

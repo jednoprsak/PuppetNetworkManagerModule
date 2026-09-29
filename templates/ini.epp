@@ -1,0 +1,12 @@
+<%- | Hash                    $content,
+      String                   $header = '# THIS FILE IS CONTROLLED BY PUPPET',
+| -%>
+<%= $header %>
+
+<% $content.each |$section, $settings| { -%>
+[<%= $section %>]
+<% $settings.each |$key, $value| { -%>
+<%= $key %>=<%= networkmanager::ini_value($value) %>
+<% } -%>
+
+<% } -%>

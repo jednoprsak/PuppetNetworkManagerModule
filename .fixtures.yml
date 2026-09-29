@@ -1,6 +1,7 @@
 # This file can be used to install module dependencies for unit testing
 # See https://github.com/puppetlabs/puppetlabs_spec_helper#using-fixtures for details
+# CI pre-clones a specific stdlib into spec/fixtures/modules/stdlib, which takes precedence over this entry.
 ---
 fixtures:
-  forge_modules:
-#     stdlib: "puppetlabs/stdlib"
+  repositories:
+    stdlib: https://github.com/puppetlabs/puppetlabs-stdlib.git
