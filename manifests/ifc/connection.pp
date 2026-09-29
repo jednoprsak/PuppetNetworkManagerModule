@@ -3,19 +3,19 @@
 #   $ensure = state of the interface config DEFAULT: present
 #   $state = state of the interface (UP/DOWN) not relevant when $ensure == 'absent' DEFAULT: 'up'
 #   $id = the name of the connection DEFAULT: $title of the resource
-#   $interface_name = name of the connection interface REQUIRED DEFAULT: $title of the resource
+#   $interface_name = name of the connection interface, an ethernet connection without the $interface_name and the $mac_address uses the $title of the resource
 #   $mac_address = the mac of the interface for the connection
 #   $master = $id or UUID of the connection master if applicable
 #   $type = the type of the connection DEFAULT: 'ethernet'
 #   $ipv4_method = what method to use to get an IPv4 address DEFAULT: 'auto'
-#   $ipv4_address = the IPv4 address with the prefix length and an optional gateway (192.168.1.12/24 or 192.168.1.12/24,192.168.1.1), more addresses as an array or as a string separated by a semicolon (192.168.1.12/24;192.168.2.12/24)
+#   $ipv4_address = the IPv4 address with the prefix length and an optional gateway (192.0.2.12/24 or 192.0.2.12/24,192.0.2.1), more addresses as an array or as a string separated by a semicolon (192.0.2.12/24;198.51.100.12/24)
 #   $ipv4_gateway = the IPv4 gateway for the connection
-#   $ipv4_dns = up to 5 DNS servers for the IPv4: an array of addresses or a string with the addresses separated by a semicolon (8.8.8.8;8.8.4.4;)
+#   $ipv4_dns = up to 5 DNS servers for the IPv4: an array of addresses or a string with the addresses separated by a semicolon (192.0.2.53;192.0.2.54;)
 #   $ipv4_may_fail = is it OK that the IPv4 config fails? DEFAULT: true
 #   $ipv6_method = what method to use to get an ipv6 address DEFAULT: 'auto'
-#   $ipv6_address = the IPv6 address with the prefix length (aa::bb:cc/64), more addresses as an array or as a string separated by a semicolon (aa::bb:cc/64;dd::ee:ff/64)
+#   $ipv6_address = the IPv6 address with the prefix length (2001:db8::12/64), more addresses as an array or as a string separated by a semicolon (2001:db8::12/64;2001:db8:1::12/64)
 #   $ipv6_gateway = the ipv6 gateway for the connection
-#   $ipv6_dns = up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (aa::bb;cc::dd;)
+#   $ipv6_dns = up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (2001:db8::53;2001:db8::54;)
 #   $ipv6_dhcp_duid = IPv6 DHCP DUID 'auto' value generates it with module from mac of the interface
 #   $ipv6_addr_gen_mode = IPv6 method for generating of automatic interface address
 #   $ipv6_privacy = should be the generated automatic address more private
@@ -55,8 +55,18 @@ define networkmanager::ifc::connection (
     fail("The connection \$id must have length from 3 to ${networkmanager::max_length_of_connection_id} characters")
   }
 
-  if $type == 'ethernet' and $interface_name == undef and $mac_address == undef {
-    fail("For ethernet connection ${id} either interface_name or mac_address is required")
+  # an ethernet connection has to be bound to an interface, without the interface name and the mac address
+  # the title is used as the interface name
+  if 'ethernet' == $type and undef == $interface_name and undef == $mac_address {
+    if $title =~ /\A[^\s\/:]{3,15}\z/ {
+      $interface_name_w = $title
+    }
+    else {
+      fail("The title '${title}' of the ethernet connection ${id} can not be used as the interface name (3 to 15 characters, no whitespace, '/' or ':'), set interface_name or mac_address")
+    }
+  }
+  else {
+    $interface_name_w = $interface_name
   }
 
   $uuid = networkmanager::connection_uuid($id)
@@ -78,7 +88,7 @@ define networkmanager::ifc::connection (
   $keyfile_contents = deep_merge(
     networkmanager::compact_keyfile({
       'connection' => {
-        'interface-name' => $interface_name,
+        'interface-name' => $interface_name_w,
         'master'         => $master ? { undef => undef, default => networkmanager::connection_uuid($master) },
         'id'             => $id,
         'uuid'           => $uuid,
@@ -112,10 +122,10 @@ define networkmanager::ifc::connection (
     # NetworkManager leaves the link administratively UP after the connection is deactivated
     # (or when it was never activated), so shut the link down explicitly. Bringing it back
     # is done by switching $state to 'up' or manually with `nmcli connection up <id>`.
-    if 'down' == $state and ($interface_name or $mac_address) {
-      $link_device = $interface_name ? {
+    if 'down' == $state and ($interface_name_w or $mac_address) {
+      $link_device = $interface_name_w ? {
         undef   => "\$(basename \"\$(dirname \"\$(grep -il '^${mac_address}\$' /sys/class/net/*/address | head -n1)\")\")",
-        default => $interface_name,
+        default => $interface_name_w,
       }
 
       exec {

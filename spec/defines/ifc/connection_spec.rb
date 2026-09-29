@@ -82,3 +82,71 @@ describe 'networkmanager::ifc::connection' do
     it { is_expected.not_to contain_file(file).with_content(%r{^(address|dns|may-fail|addr-gen-mode|ip6-privacy)}) }
   end
 end
+
+describe 'networkmanager::ifc::connection' do
+  let(:facts) { nm_test_facts('AlmaLinux', '9') }
+  let(:base) { { ipv4_method: 'auto', ipv6_method: 'ignore' } }
+
+  def keyfile(title)
+    "/etc/NetworkManager/system-connections/#{title}.nmconnection"
+  end
+
+  context 'without the interface name and the mac address' do
+    let(:title) { 'ens192' }
+    let(:params) { base }
+
+    it { is_expected.to contain_file(keyfile('ens192')).with_content(%r{^interface-name=ens192$}) }
+  end
+
+  context 'without the interface name and the mac address and with the state down' do
+    let(:title) { 'ens192' }
+    let(:params) { base.merge(state: 'down') }
+
+    it 'shuts the link down using the derived interface name' do
+      commands = catalogue.resources.select { |r| r.type == 'Exec' && r.title.start_with?('shutdown link of connection') }.map { |r| r[:command] }
+      expect(commands).to eq(['ip link set dev ens192 down'])
+    end
+  end
+
+  context 'with the mac address only' do
+    let(:title) { 'ens192' }
+    let(:params) { base.merge(mac_address: 'aa:bb:cc:dd:ee:ff') }
+
+    it { is_expected.to contain_file(keyfile('ens192')).with_content(%r{^mac-address=aa:bb:cc:dd:ee:ff$}) }
+    it { is_expected.not_to contain_file(keyfile('ens192')).with_content(%r{^interface-name=}) }
+  end
+
+  context 'with the interface name' do
+    let(:title) { 'ens192' }
+    let(:params) { base.merge(interface_name: 'eth7') }
+
+    it { is_expected.to contain_file(keyfile('ens192')).with_content(%r{^interface-name=eth7$}) }
+    it { is_expected.not_to contain_file(keyfile('ens192')).with_content(%r{^interface-name=ens192$}) }
+  end
+
+  context 'with a different id' do
+    let(:title) { 'ens192' }
+    let(:params) { base.merge(id: 'uplink') }
+
+    it { is_expected.to contain_file(keyfile('uplink')).with_content(%r{^interface-name=ens192$}) }
+  end
+
+  context 'with a title which is not usable as the interface name' do
+    ['a-title-longer-than-15', 'with space', 'a/b/c'].each do |bad_title|
+      context "'#{bad_title}'" do
+        let(:title) { bad_title }
+        let(:params) { base.merge(id: 'uplink') }
+
+        it { is_expected.to compile.and_raise_error(%r{can not be used as the interface name}) }
+      end
+    end
+  end
+
+  context 'with another type of the connection' do
+    let(:title) { 'wlan-home' }
+    let(:params) { base.merge(type: 'wifi') }
+
+    it { is_expected.to contain_file(keyfile('wlan-home')) }
+    it { is_expected.not_to contain_file(keyfile('wlan-home')).with_content(%r{^interface-name=}) }
+  end
+end

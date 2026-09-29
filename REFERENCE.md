@@ -92,14 +92,14 @@ Parameters:
 * `master` (`Optional[String]`) — default: `undef` — $id or UUID of the connection master if applicable
 * `bond_mode` (`Variant[Integer[0, 6], Enum['balance-rr', 'active-backup', 'balance-xor', 'broadcast', '802.3ad', 'balance-tlb', 'balance-alb']]`) — default: `'balance-rr'` — bonding mode DEFAULT: 'balance-rr'
 * `ipv4_method` (`Enum['auto','dhcp','manual','disabled','link-local']`) — default: `'auto'` — what method to use to get an IPv4 address DEFAULT: 'auto'
-* `ipv4_address` (`Optional[Networkmanager::IPV4_ADDRESSES]`) — default: `undef` — the IPv4 address with the prefix length and an optional gateway (192.168.1.12/24 or 192.168.1.12/24,192.168.1.1), more addresses as an array or as a string separated by a semicolon (192.168.1.12/24;192.168.2.12/24)
+* `ipv4_address` (`Optional[Networkmanager::IPV4_ADDRESSES]`) — default: `undef` — the IPv4 address with the prefix length and an optional gateway (192.0.2.12/24 or 192.0.2.12/24,192.0.2.1), more addresses as an array or as a string separated by a semicolon (192.0.2.12/24;198.51.100.12/24)
 * `ipv4_gateway` (`Optional[Stdlib::IP::Address::V4::Nosubnet]`) — default: `undef` — the IPv4 gateway for the connection
-* `ipv4_dns` (`Optional[Networkmanager::DNS_IPV4]`) — default: `undef` — up to 5 DNS servers for the IPv4: an array of addresses or a string with the addresses separated by a semicolon (8.8.8.8;8.8.4.4;)
+* `ipv4_dns` (`Optional[Networkmanager::DNS_IPV4]`) — default: `undef` — up to 5 DNS servers for the IPv4: an array of addresses or a string with the addresses separated by a semicolon (192.0.2.53;192.0.2.54;)
 * `ipv4_may_fail` (`Boolean`) — default: `true` — is it OK that the IPv4 config fails? DEFAULT: true
 * `ipv6_method` (`Enum['auto','dhcp','manual','ignore','link-local','disabled']`) — default: `'auto'` — what method to use to get an ipv6 address DEFAULT: 'auto'
-* `ipv6_address` (`Optional[Networkmanager::IPV6_ADDRESSES]`) — default: `undef` — the IPv6 address with the prefix length (aa::bb:cc/64), more addresses as an array or as a string separated by a semicolon (aa::bb:cc/64;dd::ee:ff/64)
+* `ipv6_address` (`Optional[Networkmanager::IPV6_ADDRESSES]`) — default: `undef` — the IPv6 address with the prefix length (2001:db8::12/64), more addresses as an array or as a string separated by a semicolon (2001:db8::12/64;2001:db8:1::12/64)
 * `ipv6_gateway` (`Optional[Stdlib::IP::Address::V6::Nosubnet]`) — default: `undef` — the ipv6 gateway for the connection
-* `ipv6_dns` (`Optional[Networkmanager::DNS_IPV6]`) — default: `undef` — up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (aa::bb;cc::dd;)
+* `ipv6_dns` (`Optional[Networkmanager::DNS_IPV6]`) — default: `undef` — up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (2001:db8::53;2001:db8::54;)
 * `ipv6_dhcp_duid` (`Variant[Pattern[/\h{2}(:\h{2})+$/], Undef, Enum['auto', 'lease', 'll', 'llt', 'stable-ll', 'stable-llt', 'stable-uuid']]`) — default: `undef` — IPv6 DHCP DUID 'auto' value generates it with module from mac of the interface
 * `ipv6_addr_gen_mode` (`Integer[0, 3]`) — default: `0` — IPv6 method for generating of automatic interface address
 * `ipv6_privacy` (`Integer[-1, 2]`) — default: `0` — should be the generated automatic address more private
@@ -136,14 +136,14 @@ Parameters:
 * `bridge_stp` (`Boolean`) — default: `true` — bridge the spanning tree protocol
 * `bridge_forward_delay` (`Integer[0]`) — default: `15`
 * `ipv4_method` (`Enum['auto','dhcp','manual','disabled','link-local']`) — default: `'auto'` — what method to use to get an IPv4 address DEFAULT: 'auto'
-* `ipv4_address` (`Optional[Networkmanager::IPV4_ADDRESSES]`) — default: `undef` — the IPv4 address with the prefix length and an optional gateway (192.168.1.12/24 or 192.168.1.12/24,192.168.1.1), more addresses as an array or as a string separated by a semicolon (192.168.1.12/24;192.168.2.12/24)
+* `ipv4_address` (`Optional[Networkmanager::IPV4_ADDRESSES]`) — default: `undef` — the IPv4 address with the prefix length and an optional gateway (192.0.2.12/24 or 192.0.2.12/24,192.0.2.1), more addresses as an array or as a string separated by a semicolon (192.0.2.12/24;198.51.100.12/24)
 * `ipv4_gateway` (`Optional[Stdlib::IP::Address::V4::Nosubnet]`) — default: `undef` — the IPv4 gateway for the connection
-* `ipv4_dns` (`Optional[Networkmanager::DNS_IPV4]`) — default: `undef` — up to 5 DNS servers for the IPv4: an array of addresses or a string with the addresses separated by a semicolon (8.8.8.8;8.8.4.4;)
+* `ipv4_dns` (`Optional[Networkmanager::DNS_IPV4]`) — default: `undef` — up to 5 DNS servers for the IPv4: an array of addresses or a string with the addresses separated by a semicolon (192.0.2.53;192.0.2.54;)
 * `ipv4_may_fail` (`Optional[Boolean]`) — default: `true` — is it OK that the IPv4 config fails? DEFAULT: true
 * `ipv6_method` (`Enum['auto','dhcp','manual','ignore','link-local','disabled']`) — default: `'auto'` — what method to use to get an ipv6 address DEFAULT: 'auto'
-* `ipv6_address` (`Optional[Networkmanager::IPV6_ADDRESSES]`) — default: `undef` — the IPv6 address with the prefix length (aa::bb:cc/64), more addresses as an array or as a string separated by a semicolon (aa::bb:cc/64;dd::ee:ff/64)
+* `ipv6_address` (`Optional[Networkmanager::IPV6_ADDRESSES]`) — default: `undef` — the IPv6 address with the prefix length (2001:db8::12/64), more addresses as an array or as a string separated by a semicolon (2001:db8::12/64;2001:db8:1::12/64)
 * `ipv6_gateway` (`Optional[Stdlib::IP::Address::V6::Nosubnet]`) — default: `undef` — the ipv6 gateway for the connection
-* `ipv6_dns` (`Optional[Networkmanager::DNS_IPV6]`) — default: `undef` — up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (aa::bb;cc::dd;)
+* `ipv6_dns` (`Optional[Networkmanager::DNS_IPV6]`) — default: `undef` — up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (2001:db8::53;2001:db8::54;)
 * `ipv6_dhcp_duid` (`Optional[String]`) — default: `undef` — IPv6 DHCP DUID 'auto' value generates it with module from mac of the interface
 * `ipv6_addr_gen_mode` (`Integer[0, 3]`) — default: `0` — IPv6 method for generating of automatic interface address
 * `ipv6_privacy` (`Integer[-1, 2]`) — default: `0` — should be the generated automatic address more private
@@ -174,19 +174,19 @@ Parameters:
 * `ensure` (`Enum['absent', 'present']`) — default: `present` — state of the interface config DEFAULT: present
 * `state` (`Enum['up', 'down']`) — default: `'up'` — state of the interface (UP/DOWN) not relevant when $ensure == 'absent' DEFAULT: 'up'
 * `id` (`String`) — default: `$title` — the name of the connection DEFAULT: $title of the resource
-* `interface_name` (`Optional[String[3, 15]]`) — default: `undef` — name of the connection interface REQUIRED DEFAULT: $title of the resource
+* `interface_name` (`Optional[String[3, 15]]`) — default: `undef` — name of the connection interface, an ethernet connection without the $interface_name and the $mac_address uses the $title of the resource
 * `mac_address` (`Optional[Stdlib::MAC]`) — default: `undef` — the mac of the interface for the connection
 * `master` (`Optional[String]`) — default: `undef` — $id or UUID of the connection master if applicable
 * `type` (`String`) — default: `'ethernet'` — the type of the connection DEFAULT: 'ethernet'
 * `ipv4_method` (`Enum['auto', 'dhcp', 'manual', 'disabled', 'link-local']`) — default: `'auto'` — what method to use to get an IPv4 address DEFAULT: 'auto'
-* `ipv4_address` (`Optional[Networkmanager::IPV4_ADDRESSES]`) — default: `undef` — the IPv4 address with the prefix length and an optional gateway (192.168.1.12/24 or 192.168.1.12/24,192.168.1.1), more addresses as an array or as a string separated by a semicolon (192.168.1.12/24;192.168.2.12/24)
-* `ipv4_dns` (`Optional[Networkmanager::DNS_IPV4]`) — default: `undef` — up to 5 DNS servers for the IPv4: an array of addresses or a string with the addresses separated by a semicolon (8.8.8.8;8.8.4.4;)
+* `ipv4_address` (`Optional[Networkmanager::IPV4_ADDRESSES]`) — default: `undef` — the IPv4 address with the prefix length and an optional gateway (192.0.2.12/24 or 192.0.2.12/24,192.0.2.1), more addresses as an array or as a string separated by a semicolon (192.0.2.12/24;198.51.100.12/24)
+* `ipv4_dns` (`Optional[Networkmanager::DNS_IPV4]`) — default: `undef` — up to 5 DNS servers for the IPv4: an array of addresses or a string with the addresses separated by a semicolon (192.0.2.53;192.0.2.54;)
 * `ipv4_may_fail` (`Boolean`) — default: `true` — is it OK that the IPv4 config fails? DEFAULT: true
 * `ipv4_gateway` (`Optional[Stdlib::IP::Address::V4::Nosubnet]`) — default: `undef` — the IPv4 gateway for the connection
 * `ipv6_method` (`Enum['auto', 'dhcp', 'manual', 'ignore', 'link-local', 'disabled']`) — default: `'auto'` — what method to use to get an ipv6 address DEFAULT: 'auto'
-* `ipv6_address` (`Optional[Networkmanager::IPV6_ADDRESSES]`) — default: `undef` — the IPv6 address with the prefix length (aa::bb:cc/64), more addresses as an array or as a string separated by a semicolon (aa::bb:cc/64;dd::ee:ff/64)
+* `ipv6_address` (`Optional[Networkmanager::IPV6_ADDRESSES]`) — default: `undef` — the IPv6 address with the prefix length (2001:db8::12/64), more addresses as an array or as a string separated by a semicolon (2001:db8::12/64;2001:db8:1::12/64)
 * `ipv6_gateway` (`Optional[Stdlib::IP::Address::V6::Nosubnet]`) — default: `undef` — the ipv6 gateway for the connection
-* `ipv6_dns` (`Optional[Networkmanager::DNS_IPV6]`) — default: `undef` — up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (aa::bb;cc::dd;)
+* `ipv6_dns` (`Optional[Networkmanager::DNS_IPV6]`) — default: `undef` — up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (2001:db8::53;2001:db8::54;)
 * `ipv6_dhcp_duid` (`Optional[String]`) — default: `undef` — IPv6 DHCP DUID 'auto' value generates it with module from mac of the interface
 * `ipv6_addr_gen_mode` (`Integer[0, 3]`) — default: `0` — IPv6 method for generating of automatic interface address
 * `ipv6_privacy` (`Integer[-1, 2]`) — default: `0` — should be the generated automatic address more private
@@ -296,7 +296,7 @@ Parameters:
 
 ### `networkmanager::ini_value`
 
-Formats a value for the NetworkManager keyfile (GLib key file format): the values are not quoted, the backslash, the new line, the tab, the carriage return and the leading or trailing space are escaped and an array is written as the list of values terminated by a semicolon (eg. 'a;b;'). A string is only escaped, so an already formatted list (eg. '8.8.8.8;') is left as it is.
+Formats a value for the NetworkManager keyfile (GLib key file format): the values are not quoted, the backslash, the new line, the tab, the carriage return and the leading or trailing space are escaped and an array is written as the list of values terminated by a semicolon (eg. 'a;b;'). A string is only escaped, so an already formatted list (eg. '192.0.2.53;') is left as it is.
 
 Returns: `String`
 
@@ -373,7 +373,7 @@ Parameters:
 
 ### `Networkmanager::DNS_IPV4`
 
-Up to 5 IPv4 DNS server addresses, either as an array of addresses (eg. ['8.8.8.8', '8.8.4.4']) or as the keyfile string with the addresses separated by a semicolon (eg. '8.8.8.8;8.8.4.4;')
+Up to 5 IPv4 DNS server addresses, either as an array of addresses (eg. ['192.0.2.53', '192.0.2.54']) or as the keyfile string with the addresses separated by a semicolon (eg. '192.0.2.53;192.0.2.54;')
 
 Alias of:
 
@@ -399,7 +399,7 @@ type Networkmanager::DNS_IPV6 = Variant[
 
 ### `Networkmanager::IPV4_ADDRESSES`
 
-One or more IPv4 addresses with the prefix length (eg. '192.168.1.12/24', optionally followed by the gateway), as an array or as a string with the addresses separated by a semicolon (eg. '192.168.1.12/24;192.168.2.12/24')
+One or more IPv4 addresses with the prefix length (eg. '192.0.2.12/24', optionally followed by the gateway), as an array or as a string with the addresses separated by a semicolon (eg. '192.0.2.12/24;198.51.100.12/24')
 
 Alias of:
 
@@ -413,7 +413,7 @@ type Networkmanager::IPV4_ADDRESSES = Variant[
 
 ### `Networkmanager::IPV4_CIDR`
 
-IPv4 address with the prefix length, optionally followed by a gateway (eg. '192.168.1.12/24' or '192.168.1.12/24,192.168.1.1')
+IPv4 address with the prefix length, optionally followed by a gateway (eg. '192.0.2.12/24' or '192.0.2.12/24,192.0.2.1')
 
 Alias of:
 

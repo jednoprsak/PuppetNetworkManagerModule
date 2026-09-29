@@ -1,7 +1,7 @@
 # Formats a value for the NetworkManager keyfile (GLib key file format): the values are not quoted,
 # the backslash, the new line, the tab, the carriage return and the leading or trailing space are escaped
 # and an array is written as the list of values terminated by a semicolon (eg. 'a;b;').
-# A string is only escaped, so an already formatted list (eg. '8.8.8.8;') is left as it is.
+# A string is only escaped, so an already formatted list (eg. '192.0.2.53;') is left as it is.
 # Parameters:
 #   $value = the value to format (string, number, boolean, undef or an array of them)
 

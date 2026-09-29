@@ -11,6 +11,7 @@
 1. [Usage](#usage)
 1. [Reference](#reference)
 1. [Connection id length](#connection-id-length)
+1. [Interface of the connection](#interface-of-the-connection)
 1. [Multiple IP addresses](#multiple-ip-addresses)
 1. [VLAN parent connection](#vlan-parent-connection)
 1. [Use of AI tools](#use-of-ai-tools)
@@ -58,15 +59,15 @@ class {
 networkmanager::ifc::connection {
   'zone1':
     ensure         => present,
-    mac_address    => '52:54:00:4d:2a:56',
+    mac_address    => '00:00:5e:00:53:01',
     ipv4_method    => 'manual',
-    ipv4_address   => '192.168.1.12/24,192.168.1.1',
-    ipv4_dns       => '8.8.8.8;8.8.4.4;',
+    ipv4_address   => '192.0.2.12/24,192.0.2.1',
+    ipv4_dns       => '192.0.2.53;192.0.2.54;',
     ipv6_method    => 'manual',
     ipv6_dhcp_duid => 'auto',
-    ipv6_address   => 'IPV6ADDRESS/PREFIX',
-    ipv6_dns       => 'IPV6DNS1;IPV6DNS2;',
-    ipv6_gateway   => 'IPV6GATEWAY';
+    ipv6_address   => '2001:db8::12/64',
+    ipv6_dns       => '2001:db8::53;2001:db8::54;',
+    ipv6_gateway   => '2001:db8::1';
 }
 
 networkmanager::ifc::bridge {
@@ -78,7 +79,7 @@ networkmanager::ifc::bridge {
 networkmanager::ifc::bridge::slave {
   'bridge1-slave':
     ensure      => present,
-    mac_address => 'MM:AA:CC:MM:AA:CC', #here insert MAC address string.
+    mac_address => '00:00:5e:00:53:02',
     master      => 'bridge1';
 }
 
@@ -98,14 +99,14 @@ networkmanager::ifc::bond {
 networkmanager::ifc::bond::slave {
   'bondslaveens8':
     ensure      => present,
-    mac_address => 'MAC_ADDRESS',
+    mac_address => '00:00:5e:00:53:03',
     master      => 'bondmaster2';
 }
 
 networkmanager::ifc::bond::slave {
   'bondslaveens9':
     ensure      => present,
-    mac_address => 'MAC_ADDRESS',
+    mac_address => '00:00:5e:00:53:04',
     master      => 'bondmaster2';
 }
 ```
@@ -118,8 +119,12 @@ The `connection.id` parameter is limited by default to 15 characters, because it
 The interface name has an upper limit of 15 characters set by the kernel.
 You can override this limit by setting `$networkmanager::max_length_of_connection_id` to the value you like, but then you need to set, where applicable, the `connection.interface-name` to something that is less than 16 characters long.
 
+## Interface of the connection
+An ethernet connection (`networkmanager::ifc::connection`) is bound to an interface by `interface_name` (`interface-name`) and/or `mac_address`. When neither is given, the title of the resource is used as the interface name, so `networkmanager::ifc::connection { 'ens192': ipv4_method => 'auto', ipv6_method => 'ignore' }` configures the interface `ens192`. The title must then be usable as the interface name (3 to 15 characters, no whitespace, `/` or `:`), otherwise set `interface_name` or `mac_address`.
+With only `mac_address` no interface name is written (the connection is bound by the MAC address only).
+
 ## Multiple IP addresses
-`ipv4_address` and `ipv6_address` of the `networkmanager::ifc::connection`, `::bond` and `::bridge` accept one address with the prefix length (written as `address=`, for IPv4 optionally followed by a gateway like `192.168.1.12/24,192.168.1.1`), or more addresses given as an array or as a string separated by a semicolon.
+`ipv4_address` and `ipv6_address` of the `networkmanager::ifc::connection`, `::bond` and `::bridge` accept one address with the prefix length (written as `address=`, for IPv4 optionally followed by a gateway like `192.0.2.12/24,192.0.2.1`), or more addresses given as an array or as a string separated by a semicolon.
 More addresses are written to the keyfile as `address1=`, `address2=` and so on, which is how NetworkManager stores them itself.
 
 ```puppet
@@ -127,8 +132,8 @@ networkmanager::ifc::connection {
   'ens192':
     interface_name => 'ens192',
     ipv4_method    => 'manual',
-    ipv4_address   => ['10.136.16.57/20', '10.136.16.234/20'],
-    ipv4_gateway   => '10.136.16.1',
+    ipv4_address   => ['198.51.100.57/24', '198.51.100.234/24'],
+    ipv4_gateway   => '198.51.100.1',
     ipv6_method    => 'disabled';
 }
 ```
