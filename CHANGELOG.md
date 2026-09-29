@@ -7,6 +7,7 @@
     - [OpenVox](https://voxpupuli.org/openvox/) 7 and 8 are supported and tested in the CI (`OPENVOX_GEM_VERSION` selects it in the `Gemfile`)
     - the supported `puppet` (`>= 4.9.2 < 9.0.0`) and `puppetlabs/stdlib` (`>= 5.2.0 < 11.0.0`) version ranges were verified against the individual releases
     - extended the list of supported operating systems (AlmaLinux, Amazon Linux, Arch Linux, CentOS, Debian, Fedora, Gentoo, Manjaro, Oracle Linux, RedHat, Rocky, Ubuntu)
+    - documented that `vlan_parent` is a managed connection `$id` or a plain UUID (the parent interface name is not supported), with tests
     - added `REFERENCE.md` and corrected the parameter documentation of the connection defines
     - the unused `NMMod::*` types were removed
     - the PDK leftovers (Travis, GitLab and AppVeyor configs, `.rubocop.yml`, `.sync.yml`, `pdk.yaml`, `.yardopts`, `.pdkignore`, the dev container and VS Code settings, the `pdk-*` and `template-*` keys of `metadata.json`) were removed and the `Rakefile` was reduced to the tasks used by the tests

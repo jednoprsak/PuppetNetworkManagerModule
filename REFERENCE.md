@@ -211,7 +211,7 @@ This defined resource creates the vlan connection keyfile.
 Parameters:
 
 * `vlan_id` (`Integer[1, 4094]`) — id of the desired vlan REQUIRED
-* `vlan_parent` (`Optional[String]`) — $id or UUID of the parent for this interface REQUIRED
+* `vlan_parent` (`Optional[String]`) — $id of the parent connection managed by this module or the plain UUID (without any prefix like 'UUID=') of the parent connection REQUIRED The parent interface name is not supported, if the parent is not managed by this module find out its UUID yourself and supply it.
 * `ensure` (`Enum['absent', 'present']`) — default: `present` — state of the interface config DEFAULT: present
 * `state` (`Enum['up', 'down']`) — default: `'up'` — state of the interface (UP/DOWN) not relevant when $ensure == 'absent' DEFAULT: 'up'
 * `id` (`String`) — default: `$title` — the name of the connection DEFAULT: $title of the resource

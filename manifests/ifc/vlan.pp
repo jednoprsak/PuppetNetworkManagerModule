@@ -1,7 +1,8 @@
 # This defined resource creates the vlan connection keyfile.
 # Parameters:
 #   $vlan_id = id of the desired vlan REQUIRED
-#   $vlan_parent = $id or UUID of the parent for this interface REQUIRED
+#   $vlan_parent = $id of the parent connection managed by this module or the plain UUID (without any prefix like 'UUID=') of the parent connection REQUIRED
+#     The parent interface name is not supported, if the parent is not managed by this module find out its UUID yourself and supply it.
 #   $ensure = state of the interface config DEFAULT: present
 #   $state = state of the interface (UP/DOWN) not relevant when $ensure == 'absent' DEFAULT: 'up'
 #   $id = the name of the connection DEFAULT: $title of the resource

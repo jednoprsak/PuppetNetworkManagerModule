@@ -11,6 +11,7 @@
 1. [Usage](#usage)
 1. [Reference](#reference)
 1. [Connection id length](#connection-id-length)
+1. [VLAN parent connection](#vlan-parent-connection)
 1. [Use of AI tools](#use-of-ai-tools)
 1. [Contact](#contact)
 
@@ -115,6 +116,10 @@ The classes, defined types, functions, data types and facts with their parameter
 The `connection.id` parameter is limited by default to 15 characters, because it is by default used also as the interface name.
 The interface name has an upper limit of 15 characters set by the kernel.
 You can override this limit by setting `$networkmanager::max_length_of_connection_id` to the value you like, but then you need to set, where applicable, the `connection.interface-name` to something that is less than 16 characters long.
+
+## VLAN parent connection
+The `vlan_parent` parameter of `networkmanager::ifc::vlan` is either the `$id` of a connection managed by this module (it is converted to that connection's UUID) or the plain UUID of the parent connection, written to the keyfile as `parent=<uuid>` (NetworkManager does not accept any prefix like `UUID=`).
+The name of the parent interface is deliberately not supported: if the parent is not managed by this module, you need to find out its UUID yourself (eg. `nmcli -g connection.uuid connection show <name>`) and supply it.
 
 ## Use of AI tools
 Contributions prepared with the help of AI tools (code assistants, chat bots and similar) are welcome.
