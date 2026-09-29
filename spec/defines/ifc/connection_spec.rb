@@ -41,3 +41,28 @@ describe 'networkmanager::ifc::connection' do
   it { is_expected.to contain_file('/etc/NetworkManager/system-connections/eth0conn.nmconnection').with_content(%r{^dns-search=example\.com;example\.org;$}) }
   it { is_expected.to contain_file('/etc/NetworkManager/system-connections/eth0conn.nmconnection').with_content(%r{^y=a\\\\b$}) }
 end
+
+describe 'networkmanager::ifc::connection' do
+  let(:title) { 'eth0conn' }
+  let(:facts) { nm_test_facts('AlmaLinux', '9') }
+  let(:file) { '/etc/NetworkManager/system-connections/eth0conn.nmconnection' }
+  let(:base) { { interface_name: 'eth0', ipv4_method: 'manual', ipv6_method: 'manual' } }
+
+  context 'with a single address' do
+    let(:params) { base.merge(ipv4_address: '10.0.0.5/24', ipv6_address: '2001:db8::5/64') }
+
+    it { is_expected.to contain_file(file).with_content(%r{^address=10\.0\.0\.5/24$}) }
+    it { is_expected.to contain_file(file).with_content(%r{^address=2001:db8::5/64$}) }
+  end
+
+  ['10.0.0.5/24;10.0.1.5/24', ['10.0.0.5/24', '10.0.1.5/24']].each do |addresses|
+    context "with multiple IPv4 addresses as #{addresses.class}" do
+      let(:params) { base.merge(ipv4_address: addresses, ipv6_address: %w[2001:db8::5/64 fd00::5/64], ipv4_gateway: '10.0.0.1') }
+
+      it { is_expected.to contain_file(file).with_content(%r{^address1=10\.0\.0\.5/24\naddress2=10\.0\.1\.5/24\n}) }
+      it { is_expected.to contain_file(file).with_content(%r{^address1=2001:db8::5/64\naddress2=fd00::5/64\n}) }
+      it { is_expected.not_to contain_file(file).with_content(%r{^address=}) }
+      it { is_expected.to contain_file(file).with_content(%r{^gateway=10\.0\.0\.1\naddress1=}) }
+    end
+  end
+end

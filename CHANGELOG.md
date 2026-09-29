@@ -14,6 +14,7 @@
     - the spec tests were rewritten to run against every operating system release listed in `metadata.json` and a GitHub Actions workflow runs them on Puppet 6, 7 and 8
 
 * New features:
+    - `$ipv4_address` and `$ipv6_address` accept more addresses as an array or as a string separated by a semicolon, they are written as `address1`, `address2`, ... (a single address is still written as `address`)
     - `$ipv4_dns` and `$ipv6_dns` accept also an array of up to 5 addresses (validated by the `stdlib` IP address types), the semicolon separated string is still accepted, `$ipv6_dns` strings may now contain compressed IPv6 addresses
 
 * Fixes:

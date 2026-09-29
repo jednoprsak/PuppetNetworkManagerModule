@@ -11,6 +11,7 @@
 1. [Usage](#usage)
 1. [Reference](#reference)
 1. [Connection id length](#connection-id-length)
+1. [Multiple IP addresses](#multiple-ip-addresses)
 1. [VLAN parent connection](#vlan-parent-connection)
 1. [Use of AI tools](#use-of-ai-tools)
 1. [Contact](#contact)
@@ -116,6 +117,21 @@ The classes, defined types, functions, data types and facts with their parameter
 The `connection.id` parameter is limited by default to 15 characters, because it is by default used also as the interface name.
 The interface name has an upper limit of 15 characters set by the kernel.
 You can override this limit by setting `$networkmanager::max_length_of_connection_id` to the value you like, but then you need to set, where applicable, the `connection.interface-name` to something that is less than 16 characters long.
+
+## Multiple IP addresses
+`ipv4_address` and `ipv6_address` of the `networkmanager::ifc::connection`, `::bond` and `::bridge` accept one address with the prefix length (written as `address=`, for IPv4 optionally followed by a gateway like `192.168.1.12/24,192.168.1.1`), or more addresses given as an array or as a string separated by a semicolon.
+More addresses are written to the keyfile as `address1=`, `address2=` and so on, which is how NetworkManager stores them itself.
+
+```puppet
+networkmanager::ifc::connection {
+  'ens192':
+    interface_name => 'ens192',
+    ipv4_method    => 'manual',
+    ipv4_address   => ['10.136.16.57/20', '10.136.16.234/20'],
+    ipv4_gateway   => '10.136.16.1',
+    ipv6_method    => 'disabled';
+}
+```
 
 ## VLAN parent connection
 The `vlan_parent` parameter of `networkmanager::ifc::vlan` is either the `$id` of a connection managed by this module (it is converted to that connection's UUID) or the plain UUID of the parent connection, written to the keyfile as `parent=<uuid>` (NetworkManager does not accept any prefix like `UUID=`).

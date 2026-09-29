@@ -8,12 +8,12 @@
 #   $master = $id or UUID of the connection master if applicable
 #   $bond_mode = bonding mode DEFAULT: 'balance-rr'
 #   $ipv4_method = what method to use to get an IPv4 address DEFAULT: 'auto'
-#   $ipv4_address = the IPv4 address with the prefix length and an optional gateway in format 192.168.1.12/24 or 192.168.1.12/24,192.168.1.1
+#   $ipv4_address = the IPv4 address with the prefix length and an optional gateway (192.168.1.12/24 or 192.168.1.12/24,192.168.1.1), more addresses as an array or as a string separated by a semicolon (192.168.1.12/24;192.168.2.12/24)
 #   $ipv4_gateway = the IPv4 gateway for the connection
 #   $ipv4_dns = up to 5 DNS servers for the IPv4: an array of addresses or a string with the addresses separated by a semicolon (8.8.8.8;8.8.4.4;)
 #   $ipv4_may_fail = is it OK that the IPv4 config fails? DEFAULT: true
 #   $ipv6_method = what method to use to get an ipv6 address DEFAULT: 'auto'
-#   $ipv6_address = the IPv6 address with the prefix length in format aa::bb:cc/64
+#   $ipv6_address = the IPv6 address with the prefix length (aa::bb:cc/64), more addresses as an array or as a string separated by a semicolon (aa::bb:cc/64;dd::ee:ff/64)
 #   $ipv6_gateway = the ipv6 gateway for the connection
 #   $ipv6_dns = up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (aa::bb;cc::dd;)
 #   $ipv6_dhcp_duid = IPv6 DHCP DUID 'auto' value generates it with module from mac of the interface
@@ -46,12 +46,12 @@ define networkmanager::ifc::bond (
     ]
   ]                                                           $bond_mode = 'balance-rr',
   Enum['auto','dhcp','manual','disabled','link-local']          $ipv4_method = 'auto',
-  Optional[Networkmanager::IPV4_CIDR]                           $ipv4_address = undef,
+  Optional[Networkmanager::IPV4_ADDRESSES]                           $ipv4_address = undef,
   Optional[Stdlib::IP::Address::V4::Nosubnet]                   $ipv4_gateway = undef,
   Optional[Networkmanager::DNS_IPV4]                            $ipv4_dns = undef,
   Boolean                                                       $ipv4_may_fail = true,
   Enum['auto','dhcp','manual','ignore','link-local','disabled'] $ipv6_method = 'auto',
-  Optional[Stdlib::IP::Address::V6::CIDR]                       $ipv6_address = undef,
+  Optional[Networkmanager::IPV6_ADDRESSES]                       $ipv6_address = undef,
   Optional[Stdlib::IP::Address::V6::Nosubnet]                   $ipv6_gateway = undef,
   Optional[Networkmanager::DNS_IPV6]                            $ipv6_dns = undef,
   Variant[
@@ -105,7 +105,7 @@ define networkmanager::ifc::bond (
         'method'   => $ipv4_method,
         'may-fail' => $ipv4_may_fail,
         'gateway'  => $ipv4_gateway,
-        'address'  => $ipv4_address,
+      } + networkmanager::address_settings($ipv4_address) + {
         'dns'      => networkmanager::dns_list($ipv4_dns),
       },
       'ipv6'       => {
@@ -114,7 +114,7 @@ define networkmanager::ifc::bond (
         'ip6-privacy'   => $ipv6_privacy,
         'may-fail'      => $ipv6_may_fail,
         'gateway'       => $ipv6_gateway,
-        'address'       => $ipv6_address,
+      } + networkmanager::address_settings($ipv6_address) + {
         'dns'           => networkmanager::dns_list($ipv6_dns),
         'dhcp-duid'     => $ipv6_duid,
       },
