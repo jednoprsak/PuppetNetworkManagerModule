@@ -18,6 +18,7 @@
     - `$ipv4_dns` and `$ipv6_dns` accept also an array of up to 5 addresses (validated by the `stdlib` IP address types), the semicolon separated string is still accepted, `$ipv6_dns` strings may now contain compressed IPv6 addresses
 
 * Fixes:
+    - the example in the README used a connection id shorter than the 3 characters required, an invalid DUID and had missing commas, it compiles now
     - the error for an unsupported OS family names the family instead of the garbled message
     - the keyfile values are now formatted by `networkmanager::ini_value` according to the GLib key file rules: arrays are written as `a;b;` (they were rendered as `[a, b]`), the backslash, new line, tab, carriage return and edge spaces are escaped so a value can not break the file
     - the `Networkmanager::DNS_IPV4`, `DNS_IPV6` and `IPV4_CIDR` types used unanchored patterns and accepted almost any string, they now validate the whole value

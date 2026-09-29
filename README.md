@@ -56,7 +56,7 @@ class {
 }
 
 networkmanager::ifc::connection {
-  'z1':
+  'zone1':
     ensure         => present,
     mac_address    => '52:54:00:4d:2a:56',
     ipv4_method    => 'manual',
