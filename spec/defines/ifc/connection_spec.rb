@@ -150,3 +150,54 @@ describe 'networkmanager::ifc::connection' do
     it { is_expected.not_to contain_file(keyfile('wlan-home')).with_content(%r{^interface-name=}) }
   end
 end
+
+describe 'networkmanager::ifc::connection' do
+  let(:title) { 'upstream' }
+  let(:facts) { nm_test_facts('AlmaLinux', '9') }
+  let(:file) { '/etc/NetworkManager/system-connections/upstream.nmconnection' }
+  let(:base) { { interface_name: 'ens4f0', ipv4_method: 'manual', ipv4_address: '10.10.110.57/24', ipv4_gateway: '10.10.110.1' } }
+
+  context 'with the default IPv6 method auto, the mac address and no DUID' do
+    let(:params) { base.merge(mac_address: 'aa:bb:cc:dd:ee:ff') }
+
+    it { is_expected.to contain_file(file).with_content(%r{^dhcp-duid=00:03:00:01:aa:bb:cc:dd:ee:ff$}) }
+  end
+
+  context 'with the default IPv6 method auto and neither the mac address nor the DUID (issue 29)' do
+    let(:params) { base }
+
+    it { is_expected.to compile.and_raise_error(%r{no mac_address was supplied.*ipv6_dhcp_duid_default}m) }
+
+    context 'and the class default unset' do
+      let(:pre_condition) { "class { 'networkmanager': ipv6_dhcp_duid_default => 'unset' }" }
+
+      it { is_expected.to compile }
+      it { is_expected.not_to contain_file(file).with_content(%r{dhcp-duid}) }
+    end
+
+    context 'and the class default ll' do
+      let(:pre_condition) { "class { 'networkmanager': ipv6_dhcp_duid_default => 'll' }" }
+
+      it { is_expected.to contain_file(file).with_content(%r{^dhcp-duid=ll$}) }
+    end
+
+    context 'and the DUID unset for the connection while the class default is auto' do
+      let(:params) { base.merge(ipv6_dhcp_duid: 'unset') }
+
+      it { is_expected.to compile }
+      it { is_expected.not_to contain_file(file).with_content(%r{dhcp-duid}) }
+    end
+  end
+
+  context 'with a DUID of the connection' do
+    let(:params) { base.merge(ipv6_dhcp_duid: 'stable-ll') }
+
+    it { is_expected.to contain_file(file).with_content(%r{^dhcp-duid=stable-ll$}) }
+  end
+
+  context 'with an invalid DUID' do
+    let(:params) { base.merge(ipv6_dhcp_duid: '00:22:66::52') }
+
+    it { is_expected.to compile.and_raise_error(%r{ipv6_dhcp_duid}) }
+  end
+end

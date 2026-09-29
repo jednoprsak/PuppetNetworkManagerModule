@@ -11,6 +11,7 @@
 1. [Usage](#usage)
 1. [Reference](#reference)
 1. [Connection id length](#connection-id-length)
+1. [IPv6 DHCP DUID](#ipv6-dhcp-duid)
 1. [Interface of the connection](#interface-of-the-connection)
 1. [Multiple IP addresses](#multiple-ip-addresses)
 1. [VLAN parent connection](#vlan-parent-connection)
@@ -118,6 +119,20 @@ The classes, defined types, functions, data types and facts with their parameter
 The `connection.id` parameter is limited by default to 15 characters, because it is by default used also as the interface name.
 The interface name has an upper limit of 15 characters set by the kernel.
 You can override this limit by setting `$networkmanager::max_length_of_connection_id` to the value you like, but then you need to set, where applicable, the `connection.interface-name` to something that is less than 16 characters long.
+
+## IPv6 DHCP DUID
+For a connection with the `auto` or `dhcp` IPv6 method the DHCP DUID (`ipv6.dhcp-duid`) is written to the keyfile, because the default DUID of NetworkManager is random and would break getting the right lease from the DHCP server.
+The `ipv6_dhcp_duid` of the connection is used, and when it is not set the `ipv6_dhcp_duid_default` of the `networkmanager` class (`'auto'` by default):
+
+* `'auto'`: the DUID is built from the `mac_address` of the connection and the `duid_prefix` of the class (`00:03:00:01:<mac>`), the connection then needs the `mac_address`,
+* `'unset'`: nothing is written and NetworkManager uses its own default (`lease`), no `mac_address` is needed,
+* `ll`, `llt`, `lease`, `stable-ll`, `stable-llt`, `stable-uuid`: the NetworkManager keyword is written as it is,
+* a literal DUID (`00:03:00:01:aa:bb:cc:dd:ee:ff`): written as it is (the same DUID on all the connections that use the default).
+
+```yaml
+# workstations and laptops (Hiera): let NetworkManager decide
+networkmanager::ipv6_dhcp_duid_default: unset
+```
 
 ## Interface of the connection
 An ethernet connection (`networkmanager::ifc::connection`) is bound to an interface by `interface_name` (`interface-name`) and/or `mac_address`. When neither is given, the title of the resource is used as the interface name, so `networkmanager::ifc::connection { 'ens192': ipv4_method => 'auto', ipv6_method => 'ignore' }` configures the interface `ens192`. The title must then be usable as the interface name (3 to 15 characters, no whitespace, `/` or `:`), otherwise set `interface_name` or `mac_address`.

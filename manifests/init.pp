@@ -13,6 +13,9 @@
 #     for the connection $interface_name, if you change this you need to take care to supply
 #     the $interface_name with length < 16 characters where applicable
 #   $duid_prefix = allows the change of the duid prefix to anything other with format "aa:bb:cc:dd" (downcased)
+#   $ipv6_dhcp_duid_default = the IPv6 DHCP DUID used for the connections which do not set their own $ipv6_dhcp_duid DEFAULT: 'auto'
+#     'auto' builds it from the mac address of the connection (the connection needs the $mac_address), 'unset' writes nothing so NetworkManager
+#     uses its own default, the NetworkManager keywords (ll, llt, lease, stable-ll, stable-llt, stable-uuid) or a literal DUID (aa:bb:cc:...) are used as they are
 #   $additional_config = Configuration hash for the NetworkManager.conf, it is able to override default module config in case of conflict!
 # @example
 #   include networkmanager
@@ -29,6 +32,7 @@ class networkmanager (
   Array[String]                         $plugins = ['keyfile'],
   Integer[3]                            $max_length_of_connection_id = 15,
   Pattern[/^\h{2}(:\h{2}){3}$/]         $duid_prefix = '00:03:00:01',
+  Networkmanager::DHCP_DUID             $ipv6_dhcp_duid_default = 'auto',
   Hash                                  $additional_config = {},
 ) {
   $sys_id = [

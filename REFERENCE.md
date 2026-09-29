@@ -20,6 +20,7 @@ Parameters:
 * `plugins` (`Array[String]`) — default: `['keyfile']` — should we use different plugins to get network config data (NOT RECOMMENDED TO CHANGE)
 * `max_length_of_connection_id` (`Integer[3]`) — default: `15` — Limit the name of the connection to this length. DEFAULT: 15 characters to comply with kernel interface name limits since the connection $id is used as default for the connection $interface_name, if you change this you need to take care to supply the $interface_name with length < 16 characters where applicable
 * `duid_prefix` (`Pattern[/^\h{2}(:\h{2}){3}$/]`) — default: `'00:03:00:01'` — allows the change of the duid prefix to anything other with format "aa:bb:cc:dd" (downcased)
+* `ipv6_dhcp_duid_default` (`Networkmanager::DHCP_DUID`) — default: `'auto'` — the IPv6 DHCP DUID used for the connections which do not set their own $ipv6_dhcp_duid DEFAULT: 'auto' 'auto' builds it from the mac address of the connection (the connection needs the $mac_address), 'unset' writes nothing so NetworkManager uses its own default, the NetworkManager keywords (ll, llt, lease, stable-ll, stable-llt, stable-uuid) or a literal DUID (aa:bb:cc:...) are used as they are
 * `additional_config` (`Hash`) — default: `{}` — Configuration hash for the NetworkManager.conf, it is able to override default module config in case of conflict!
 
 ### `networkmanager::config`
@@ -100,7 +101,7 @@ Parameters:
 * `ipv6_address` (`Optional[Networkmanager::IPV6_ADDRESSES]`) — default: `undef` — the IPv6 address with the prefix length (2001:db8::12/64), more addresses as an array or as a string separated by a semicolon (2001:db8::12/64;2001:db8:1::12/64)
 * `ipv6_gateway` (`Optional[Stdlib::IP::Address::V6::Nosubnet]`) — default: `undef` — the ipv6 gateway for the connection
 * `ipv6_dns` (`Optional[Networkmanager::DNS_IPV6]`) — default: `undef` — up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (2001:db8::53;2001:db8::54;)
-* `ipv6_dhcp_duid` (`Variant[Pattern[/\h{2}(:\h{2})+$/], Undef, Enum['auto', 'lease', 'll', 'llt', 'stable-ll', 'stable-llt', 'stable-uuid']]`) — default: `undef` — IPv6 DHCP DUID 'auto' value generates it with module from mac of the interface
+* `ipv6_dhcp_duid` (`Optional[Networkmanager::DHCP_DUID]`) — default: `undef` — IPv6 DHCP DUID, 'auto' builds it from the $mac_address, 'unset' writes nothing (NetworkManager default), a NetworkManager keyword or a literal DUID is used as it is DEFAULT: $networkmanager::ipv6_dhcp_duid_default
 * `ipv6_addr_gen_mode` (`Integer[0, 3]`) — default: `0` — IPv6 method for generating of automatic interface address
 * `ipv6_privacy` (`Integer[-1, 2]`) — default: `0` — should be the generated automatic address more private
 * `ipv6_may_fail` (`Boolean`) — default: `true` — is it OK that the ipv6 config fails? DEFAULT: true
@@ -144,7 +145,7 @@ Parameters:
 * `ipv6_address` (`Optional[Networkmanager::IPV6_ADDRESSES]`) — default: `undef` — the IPv6 address with the prefix length (2001:db8::12/64), more addresses as an array or as a string separated by a semicolon (2001:db8::12/64;2001:db8:1::12/64)
 * `ipv6_gateway` (`Optional[Stdlib::IP::Address::V6::Nosubnet]`) — default: `undef` — the ipv6 gateway for the connection
 * `ipv6_dns` (`Optional[Networkmanager::DNS_IPV6]`) — default: `undef` — up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (2001:db8::53;2001:db8::54;)
-* `ipv6_dhcp_duid` (`Optional[String]`) — default: `undef` — IPv6 DHCP DUID 'auto' value generates it with module from mac of the interface
+* `ipv6_dhcp_duid` (`Optional[Networkmanager::DHCP_DUID]`) — default: `undef` — IPv6 DHCP DUID, 'auto' builds it from the $mac_address, 'unset' writes nothing (NetworkManager default), a NetworkManager keyword or a literal DUID is used as it is DEFAULT: $networkmanager::ipv6_dhcp_duid_default
 * `ipv6_addr_gen_mode` (`Integer[0, 3]`) — default: `0` — IPv6 method for generating of automatic interface address
 * `ipv6_privacy` (`Integer[-1, 2]`) — default: `0` — should be the generated automatic address more private
 * `ipv6_may_fail` (`Boolean`) — default: `true` — is it OK that the ipv6 config fails? DEFAULT: true
@@ -187,7 +188,7 @@ Parameters:
 * `ipv6_address` (`Optional[Networkmanager::IPV6_ADDRESSES]`) — default: `undef` — the IPv6 address with the prefix length (2001:db8::12/64), more addresses as an array or as a string separated by a semicolon (2001:db8::12/64;2001:db8:1::12/64)
 * `ipv6_gateway` (`Optional[Stdlib::IP::Address::V6::Nosubnet]`) — default: `undef` — the ipv6 gateway for the connection
 * `ipv6_dns` (`Optional[Networkmanager::DNS_IPV6]`) — default: `undef` — up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (2001:db8::53;2001:db8::54;)
-* `ipv6_dhcp_duid` (`Optional[String]`) — default: `undef` — IPv6 DHCP DUID 'auto' value generates it with module from mac of the interface
+* `ipv6_dhcp_duid` (`Optional[Networkmanager::DHCP_DUID]`) — default: `undef` — IPv6 DHCP DUID, 'auto' builds it from the $mac_address, 'unset' writes nothing (NetworkManager default), a NetworkManager keyword or a literal DUID is used as it is DEFAULT: $networkmanager::ipv6_dhcp_duid_default
 * `ipv6_addr_gen_mode` (`Integer[0, 3]`) — default: `0` — IPv6 method for generating of automatic interface address
 * `ipv6_privacy` (`Integer[-1, 2]`) — default: `0` — should be the generated automatic address more private
 * `ipv6_may_fail` (`Boolean`) — default: `true` — is it OK that the ipv6 config fails? DEFAULT: true
@@ -356,6 +357,21 @@ Parameters:
 * `uuid` (`Pattern[/^\h{8}-(\h{4}-){3}\h{12}$/]`) — the connection uuid
 * `state` (`Enum['up', 'down']`) — the desired connection state
 
+### `networkmanager::resolve_ipv6_duid`
+
+Returns the IPv6 DHCP DUID to write to the keyfile of the connection, undef when nothing should be written. The DUID is written only for the 'auto' and 'dhcp' methods of an active connection. The DUID of the connection wins, the $networkmanager::ipv6_dhcp_duid_default is used when it is not set. The 'auto' DUID needs the mac address.
+
+Returns: `Optional[String]`
+
+Parameters:
+
+* `duid` (`Optional[Networkmanager::DHCP_DUID]`) — the DUID set for the connection (undef to use the default of the networkmanager class)
+* `mac_address` (`Optional[Stdlib::MAC]`) — the mac address of the interface for the connection
+* `ipv6_method` (`String`) — the IPv6 method of the connection (after networkmanager::ipv6_disable_version)
+* `ensure` (`String`) — the state of the connection config
+* `state` (`String`) — the state of the connection (up/down)
+* `id` (`String`) — the id of the connection (for the error message)
+
 ### `networkmanager::validate_ifc_name_and_mac`
 
 Validates that the connection has at least one of 'mac address' or 'interface name' supplied
@@ -370,6 +386,19 @@ Parameters:
 * `interface_name` (`Variant[Undef, String[3, 15]]`)
 
 ## Data types
+
+### `Networkmanager::DHCP_DUID`
+
+The IPv6 DHCP DUID of a connection: 'auto' builds it from the mac address of the interface (see the duid_prefix of the networkmanager class), 'unset' does not write it so NetworkManager uses its own default, the other values are the NetworkManager keywords or a literal DUID (aa:bb:cc:...)
+
+Alias of:
+
+```puppet
+type Networkmanager::DHCP_DUID = Variant[
+  Pattern[/\A\h{2}(:\h{2})+\z/],
+  Enum['auto', 'unset', 'lease', 'll', 'llt', 'stable-ll', 'stable-llt', 'stable-uuid'],
+]
+```
 
 ### `Networkmanager::DNS_IPV4`
 
@@ -399,7 +428,7 @@ type Networkmanager::DNS_IPV6 = Variant[
 
 ### `Networkmanager::IPV4_ADDRESSES`
 
-One or more IPv4 addresses with the prefix length (eg. '192.0.2.12/24', optionally followed by the gateway), as an array or as a string with the addresses separated by a semicolon (eg. '192.0.2.12/24;198.51.100.12/24')
+One or more IPv4 addresses with the prefix length (eg. '192.168.1.12/24', optionally followed by the gateway), as an array or as a string with the addresses separated by a semicolon (eg. '192.168.1.12/24;192.168.2.12/24')
 
 Alias of:
 
@@ -413,7 +442,7 @@ type Networkmanager::IPV4_ADDRESSES = Variant[
 
 ### `Networkmanager::IPV4_CIDR`
 
-IPv4 address with the prefix length, optionally followed by a gateway (eg. '192.0.2.12/24' or '192.0.2.12/24,192.0.2.1')
+IPv4 address with the prefix length, optionally followed by a gateway (eg. '192.168.1.12/24' or '192.168.1.12/24,192.168.1.1')
 
 Alias of:
 

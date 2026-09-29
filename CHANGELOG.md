@@ -14,6 +14,8 @@
     - the spec tests were rewritten to run against every operating system release listed in `metadata.json` and a GitHub Actions workflow runs them on Puppet 6, 7 and 8
 
 * New features:
+    - the new `$networkmanager::ipv6_dhcp_duid_default` (`'auto'` by default) is used for the connections that do not set their own `$ipv6_dhcp_duid`, a connection with the `$mac_address` therefore does not need `$ipv6_dhcp_duid => 'auto'` any more (it failed to compile before), the value `'unset'` (for the class and for a connection) does not write the DUID at all so NetworkManager uses its own default; the DUID is resolved by `networkmanager::resolve_ipv6_duid`
+    - `$ipv6_dhcp_duid` of `connection`, `bond` and `bridge` is validated by the `Networkmanager::DHCP_DUID` type (the `connection` accepted any string before)
     - an ethernet `networkmanager::ifc::connection` without `$interface_name` and `$mac_address` uses its title as the interface name (it failed to compile before), a title which can not be an interface name fails with a clear message
     - only the `method` is written to the `ipv4` section when it is `disabled` and to the `ipv6` section when it is `ignore` or `disabled`, the other settings have no effect there (based on the pull request 24 by kbucheli), the settings are prepared by `networkmanager::prepare_ipv4_config` and `networkmanager::prepare_ipv6_config`
     - `$ipv4_address` and `$ipv6_address` accept more addresses as an array or as a string separated by a semicolon, they are written as `address1`, `address2`, ... (a single address is still written as `address`)

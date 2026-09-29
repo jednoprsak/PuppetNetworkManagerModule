@@ -17,7 +17,7 @@
 #   $ipv6_address = the IPv6 address with the prefix length (2001:db8::12/64), more addresses as an array or as a string separated by a semicolon (2001:db8::12/64;2001:db8:1::12/64)
 #   $ipv6_gateway = the ipv6 gateway for the connection
 #   $ipv6_dns = up to 5 DNS servers for the IPv6: an array of addresses or a string with the addresses separated by a semicolon (2001:db8::53;2001:db8::54;)
-#   $ipv6_dhcp_duid = IPv6 DHCP DUID 'auto' value generates it with module from mac of the interface
+#   $ipv6_dhcp_duid = IPv6 DHCP DUID, 'auto' builds it from the $mac_address, 'unset' writes nothing (NetworkManager default), a NetworkManager keyword or a literal DUID is used as it is DEFAULT: $networkmanager::ipv6_dhcp_duid_default
 #   $ipv6_addr_gen_mode = IPv6 method for generating of automatic interface address
 #   $ipv6_privacy = should be the generated automatic address more private
 #   $ipv6_may_fail = is it OK that the ipv6 config fails? DEFAULT: true
@@ -45,7 +45,7 @@ define networkmanager::ifc::bridge (
   Optional[Networkmanager::IPV6_ADDRESSES]                       $ipv6_address = undef,
   Optional[Stdlib::IP::Address::V6::Nosubnet]                   $ipv6_gateway = undef,
   Optional[Networkmanager::DNS_IPV6]                            $ipv6_dns = undef,
-  Optional[String]                                              $ipv6_dhcp_duid = undef,
+  Optional[Networkmanager::DHCP_DUID] $ipv6_dhcp_duid = undef,
   Integer[0, 3]                                                 $ipv6_addr_gen_mode = 0,
   Integer[-1, 2]                                                $ipv6_privacy = 0,
   Boolean                                                       $ipv6_may_fail = true,
@@ -62,17 +62,7 @@ define networkmanager::ifc::bridge (
 
   $uuid = networkmanager::connection_uuid($id)
 
-  $ipv6_dhcp_duid_w = networkmanager::get_ipv6_duid($ipv6_dhcp_duid, $mac_address)
-
-  if $ipv6_method_w in ['auto', 'dhcp'] and 'up' == $state {
-    if $ipv6_dhcp_duid_w == undef and 'present' == $ensure {
-      fail("IPv6 method for connection '${id}' is '${ipv6_method_w}' but no \$ipv6_dhcp_duid was supplied.")
-    }
-    $ipv6_duid = $ipv6_dhcp_duid_w
-  }
-  else {
-    $ipv6_duid = undef
-  }
+  $ipv6_duid = networkmanager::resolve_ipv6_duid($ipv6_dhcp_duid, $mac_address, $ipv6_method_w, $ensure, $state, $id)
 
   $keyfile_contents = deep_merge(
     networkmanager::compact_keyfile({

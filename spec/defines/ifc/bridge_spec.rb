@@ -25,3 +25,24 @@ describe 'networkmanager::ifc::bridge' do
 
   it { is_expected.to contain_file('/etc/NetworkManager/system-connections/br1.nmconnection').with_content(%r{^dns=1\.1\.1\.1;$}) }
 end
+
+describe 'networkmanager::ifc::bridge' do
+  let(:title) { 'br0' }
+  let(:facts) { nm_test_facts('AlmaLinux', '9') }
+
+  context 'with the IPv6 method auto and no DUID or mac address' do
+    it { is_expected.to compile.and_raise_error(%r{no mac_address was supplied}) }
+
+    context 'and the class default unset' do
+      let(:pre_condition) { "class { 'networkmanager': ipv6_dhcp_duid_default => 'unset' }" }
+
+      it { is_expected.not_to contain_file('/etc/NetworkManager/system-connections/br0.nmconnection').with_content(%r{dhcp-duid}) }
+    end
+  end
+
+  context 'with the IPv6 method auto and the mac address' do
+    let(:params) { { mac_address: 'aa:bb:cc:dd:ee:ff' } }
+
+    it { is_expected.to contain_file('/etc/NetworkManager/system-connections/br0.nmconnection').with_content(%r{^dhcp-duid=00:03:00:01:aa:bb:cc:dd:ee:ff$}) }
+  end
+end
