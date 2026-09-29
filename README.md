@@ -15,6 +15,7 @@
 1. [Interface of the connection](#interface-of-the-connection)
 1. [Multiple IP addresses](#multiple-ip-addresses)
 1. [VLAN parent connection](#vlan-parent-connection)
+1. [Development](#development)
 1. [Use of AI tools](#use-of-ai-tools)
 1. [Contact](#contact)
 
@@ -156,6 +157,20 @@ networkmanager::ifc::connection {
 ## VLAN parent connection
 The `vlan_parent` parameter of `networkmanager::ifc::vlan` is either the `$id` of a connection managed by this module (it is converted to that connection's UUID) or the plain UUID of the parent connection, written to the keyfile as `parent=<uuid>` (NetworkManager does not accept any prefix like `UUID=`).
 The name of the parent interface is deliberately not supported: if the parent is not managed by this module, you need to find out its UUID yourself (eg. `nmcli -g connection.uuid connection show <name>`) and supply it.
+
+## Development
+The tests are in `spec/` and the same checks as in the GitHub Actions workflow (`.github/workflows/ci.yml`) can be run locally:
+
+```sh
+bundle install
+bundle exec metadata-json-lint metadata.json
+bundle exec rake syntax lint          # the lint fails on warnings
+git clone --depth 1 --branch v9.7.0 https://github.com/puppetlabs/puppetlabs-stdlib.git spec/fixtures/modules/stdlib
+bundle exec rake spec
+```
+
+`PUPPET_GEM_VERSION` (eg. `'~> 7.0'`) or `OPENVOX_GEM_VERSION` selects the version of Puppet or OpenVox for the `bundle install`, the version of `stdlib` is the one you clone into `spec/fixtures/modules/stdlib`.
+The specs generate the facts of every operating system release listed in `operatingsystem_support` of `metadata.json` (`spec/spec_helper_local.rb`), so a release added there is tested automatically.
 
 ## Use of AI tools
 Contributions prepared with the help of AI tools (code assistants, chat bots and similar) are welcome.
