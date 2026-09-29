@@ -1,5 +1,10 @@
 # networkmanager
 
+> **This repository is not developed any more.** The development of the module continues in
+> **https://github.com/samuraiii/PuppetNetworkManagerModule** (releases, issues and pull requests),
+> please use that repository. The last release published here is
+> [v1.1.0](https://github.com/jednoprsak/PuppetNetworkManagerModule/releases/tag/v1.1.0).
+
 
 ## Table of Contents
 
@@ -188,5 +193,5 @@ Pull requests that look like unreviewed AI output can be closed without a detail
 
 ## Contact
 
-Use the issues on GitHub: https://github.com/jednoprsak/PuppetNetworkManagerModule/issues
+Use the issues of the repository where the development continues: https://github.com/samuraiii/PuppetNetworkManagerModule/issues
 
